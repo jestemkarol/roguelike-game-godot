@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://bcu6eubkxlksc"]
+[gd_scene load_steps=20 format=3 uid="uid://bcu6eubkxlksc"]
 
 [ext_resource type="PackedScene" uid="uid://b3xl2512wepbf" path="res://scenes/player.tscn" id="1_f3vb6"]
 [ext_resource type="Texture2D" uid="uid://dr3ci1n2f5cgp" path="res://assets/tilesets/grass.png" id="2_chfj1"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://ddbog4a8emxo3" path="res://assets/tilesets/walls/wooden_door.png" id="7_p0c4t"]
 [ext_resource type="Texture2D" uid="uid://ls4x1nowbt0n" path="res://assets/tilesets/floors/wooden.png" id="8_kssvj"]
 [ext_resource type="Texture2D" uid="uid://c2ghwooskaqo4" path="res://assets/objects/objects.png" id="9_hely2"]
+[ext_resource type="PackedScene" uid="uid://6ae586rtqfio" path="res://scenes/enemy.tscn" id="10_1ajha"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h4c5a"]
 texture = ExtResource("2_chfj1")
@@ -523,3 +524,25 @@ position = Vector2(23, 174)
 [node name="Camera2D" type="Camera2D" parent="Player"]
 position = Vector2(0, -5)
 zoom = Vector2(4, 4)
+
+[node name="Enemies" type="Node" parent="."]
+
+[node name="Enemy" parent="Enemies" instance=ExtResource("10_1ajha")]
+z_index = 1
+position = Vector2(448, 178)
+
+[node name="Enemy2" parent="Enemies" instance=ExtResource("10_1ajha")]
+z_index = 1
+position = Vector2(76, 79)
+
+[node name="Enemy3" parent="Enemies" instance=ExtResource("10_1ajha")]
+z_index = 1
+position = Vector2(88, 221)
+
+[node name="Enemy4" parent="Enemies" instance=ExtResource("10_1ajha")]
+z_index = 1
+position = Vector2(471, 330)
+
+[node name="Enemy5" parent="Enemies" instance=ExtResource("10_1ajha")]
+z_index = 1
+position = Vector2(585, 83)

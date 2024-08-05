@@ -390,7 +390,7 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_e7lqa"]
 radius = 4.0
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_ir52w")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -400,5 +400,4 @@ autoplay = "idle_down"
 offset = Vector2(0, -15)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-z_index = 1
 shape = SubResource("CircleShape2D_e7lqa")
