@@ -7,6 +7,7 @@ extends CharacterBody2D
 
 @export var speed = 100
 @export var health = 100
+var input_direction = Vector2.ZERO
 var current_dir = 'down'
 var enemy_in_attack_range = false
 var just_hit = false
@@ -23,19 +24,32 @@ func _physics_process(delta: float) -> void:
 	player_movement(delta)
 	
 func player_movement(delta: float) -> void:
+	input_direction = Input.get_vector('move_left', 'move_right', 'move_up', 'move_down')
+	velocity = movement()
+
 	if Input.is_action_pressed('attack'):
 		attack()
-	if Input.is_action_pressed('move_right'):
-		velocity = movement('right', 'move', speed, 0)
-	elif Input.is_action_pressed('move_left'):
-		velocity = movement('left', 'move', -speed, 0)
-	elif Input.is_action_pressed('move_down'):
-		velocity = movement('down', 'move', 0, speed)
-	elif Input.is_action_pressed('move_up'):
-		velocity = movement('up', 'move', 0, -speed)
-	else:
-		velocity = idle()
+
 	move_and_slide()
+
+func play_movement_animation(type: String) -> void:
+	if input_direction.y > input_direction.x && input_direction.y > -input_direction.x:
+		animation_player.flip_h = false
+		current_dir = 'down'
+		animation_player.play('%s_down' % type)
+	elif input_direction.y > input_direction.x && input_direction.y < -input_direction.x:
+		animation_player.flip_h = true
+		current_dir = 'left'
+		animation_player.play('%s_side' % type)
+	elif input_direction.y < input_direction.x && input_direction.y < -input_direction.x:
+		animation_player.flip_h = false
+		current_dir = 'up'
+		animation_player.play('%s_up' % type)
+	elif input_direction.y < input_direction.x && input_direction.y > -input_direction.x:
+		animation_player.flip_h = false
+		current_dir = 'right'
+		animation_player.play('%s_side' % type)
+	switch_hitbox_shape(current_dir)
 
 func attack() -> void:
 	is_attacking = true
@@ -44,24 +58,19 @@ func attack() -> void:
 	if enemy:
 		enemy.hit(20)
 
-func movement(direction: String, animation_type: String, x: int, y: int) -> Vector2:
+func movement():
 	if is_attacking:
 		return Vector2.ZERO
-	switch_hitbox_shape(direction)
-	current_dir = direction
-	play_animation(animation_type)
-	return Vector2(x, y)
+	if input_direction != Vector2.ZERO:
+		play_movement_animation('move')
+	else:
+		play_animation('idle')
+	return input_direction * speed
 
 func switch_hitbox_shape(direction):
 	for shape in player_hitbox.get_children():
 		shape.disabled = true
 	player_hitbox.get_node(direction).disabled = false
-
-func idle() -> Vector2:
-	if is_attacking:
-		return Vector2.ZERO
-	play_animation('idle')
-	return Vector2.ZERO
 
 func play_animation(type):
 	var dir = current_dir
