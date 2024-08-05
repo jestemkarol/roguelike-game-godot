@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://b3xl2512wepbf"]
+[gd_scene load_steps=56 format=3 uid="uid://b3xl2512wepbf"]
 
 [ext_resource type="Texture2D" uid="uid://b223n1gso3ifa" path="res://assets/characters/player.png" id="1_1ja81"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_ir52w"]
@@ -210,7 +210,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_4o05c")
 }],
-"loop": true,
+"loop": false,
 "name": &"attack_down",
 "speed": 10.0
 }, {
@@ -227,7 +227,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_sg757")
 }],
-"loop": true,
+"loop": false,
 "name": &"attack_side",
 "speed": 10.0
 }, {
@@ -244,7 +244,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_lenu6")
 }],
-"loop": true,
+"loop": false,
 "name": &"attack_up",
 "speed": 10.0
 }, {
@@ -390,6 +390,15 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_e7lqa"]
 radius = 4.0
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p5fji"]
+size = Vector2(13, 17)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o2ic1"]
+size = Vector2(25, 19.25)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iktgm"]
+size = Vector2(23.5, 17.5)
+
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_ir52w")
 
@@ -397,7 +406,45 @@ script = ExtResource("1_ir52w")
 sprite_frames = SubResource("SpriteFrames_t6hxi")
 animation = &"attack_down"
 autoplay = "idle_down"
+frame = 3
+frame_progress = 1.0
 offset = Vector2(0, -15)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_e7lqa")
+
+[node name="player_knockback_hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="player_knockback_hitbox"]
+position = Vector2(0.5, -6.5)
+shape = SubResource("RectangleShape2D_p5fji")
+
+[node name="player_hitbox" type="Area2D" parent="."]
+
+[node name="up" type="CollisionShape2D" parent="player_hitbox"]
+position = Vector2(0.5, -7.375)
+shape = SubResource("RectangleShape2D_o2ic1")
+
+[node name="right" type="CollisionShape2D" parent="player_hitbox"]
+position = Vector2(5.5, -3.5)
+shape = SubResource("RectangleShape2D_iktgm")
+
+[node name="left" type="CollisionShape2D" parent="player_hitbox"]
+position = Vector2(-6, -3.5)
+shape = SubResource("RectangleShape2D_iktgm")
+
+[node name="down" type="CollisionShape2D" parent="player_hitbox"]
+position = Vector2(2, 0.75)
+shape = SubResource("RectangleShape2D_iktgm")
+
+[node name="just_hit_timer" type="Timer" parent="."]
+one_shot = true
+
+[node name="deal_attack_timer" type="Timer" parent="."]
+wait_time = 0.3
+
+[connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
+[connection signal="body_entered" from="player_knockback_hitbox" to="." method="_on_player_knockback_hitbox_body_entered"]
+[connection signal="body_entered" from="player_hitbox" to="." method="_on_player_hitbox_body_entered"]
+[connection signal="timeout" from="just_hit_timer" to="." method="_on_just_hit_timer_timeout"]
+[connection signal="timeout" from="deal_attack_timer" to="." method="_on_deal_attack_timer_timeout"]
