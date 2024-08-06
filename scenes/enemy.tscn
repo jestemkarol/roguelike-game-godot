@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=3 uid="uid://6ae586rtqfio"]
+[gd_scene load_steps=64 format=3 uid="uid://6ae586rtqfio"]
 
 [ext_resource type="Script" path="res://scripts/enemy.gd" id="1_8s7k4"]
 [ext_resource type="Texture2D" uid="uid://c4pspa4qntvt" path="res://assets/characters/slime.png" id="1_l4xd6"]
@@ -455,7 +455,10 @@ radius = 92.0054
 radius = 3.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mhqt0"]
-radius = 24.0208
+radius = 20.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0dfwn"]
+size = Vector2(20, 13)
 
 [node name="Enemy" type="CharacterBody2D" groups=["enemy", "slime"]]
 script = ExtResource("1_8s7k4")
@@ -472,13 +475,14 @@ offset = Vector2(0, -4)
 visible = false
 shape = SubResource("CircleShape2D_0rqlw")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="enemy_collision_shape" type="CollisionShape2D" parent="."]
 position = Vector2(0, -1)
 shape = SubResource("CircleShape2D_p1m0t")
 
 [node name="enemy_hitbox" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="enemy_hitbox"]
+visible = false
 position = Vector2(0, -2)
 shape = SubResource("CircleShape2D_mhqt0")
 
@@ -487,9 +491,17 @@ shape = SubResource("CircleShape2D_mhqt0")
 [node name="attack_cooldown_timer" type="Timer" parent="."]
 wait_time = 3.0
 
+[node name="enemy_knockback_hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="enemy_knockback_hitbox"]
+position = Vector2(0, -1)
+shape = SubResource("RectangleShape2D_0dfwn")
+
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="body_entered" from="DetectionArea" to="." method="_on_detection_area_body_entered"]
 [connection signal="body_exited" from="DetectionArea" to="." method="_on_detection_area_body_exited"]
 [connection signal="body_entered" from="enemy_hitbox" to="." method="_on_enemy_hitbox_body_entered"]
+[connection signal="body_exited" from="enemy_hitbox" to="." method="_on_enemy_hitbox_body_exited"]
 [connection signal="timeout" from="just_hit_timer" to="." method="_on_just_hit_timer_timeout"]
 [connection signal="timeout" from="attack_cooldown_timer" to="." method="_on_attack_cooldown_timer_timeout"]
+[connection signal="body_entered" from="enemy_knockback_hitbox" to="." method="_on_enemy_knockback_hitbox_body_entered"]

@@ -43,18 +43,6 @@ func apply_knockback(delta):
 		knockback_direction = Vector2.ZERO
 		velocity = Vector2.ZERO
 
-	#if !(knockback_direction.abs().x < 0.00001 && knockback_direction.abs().y < 0.00001):
-		#print("kd: %s, p: %s, lerp: %s" % [knockback_direction * knockback_force, position, lerp(knockback_direction * knockback_force, Vector2.ZERO, knockback_weight)])
-		#knockback_direction = lerp(knockback_direction * knockback_force, Vector2.ZERO, knockback_weight)
-		#print('Assumed velocity %s' % Vector2(knockback_direction.x * knockback_force, knockback_direction.y * knockback_force))
-		#velocity = Vector2(knockback_direction.x * knockback_force, knockback_direction.y * knockback_force)
-		#print(velocity)
-		#velocity = lerp(Vector2.ZERO, knockback_direction - position, 0.1)
-		#knockback_direction = velocity
-		#move_and_slide()
-		#if knockback_direction == Vector2(-0, 0):
-			#in_knockback_state = false
-		#return
 func normal_movement(delta):
 	if Input.is_action_pressed('attack'):
 		attack()
@@ -85,7 +73,7 @@ func attack() -> void:
 	deal_attack_timer.start()
 	play_animation('attack')
 	if enemy:
-		enemy.hit(20)
+		enemy.hit(20, (enemy.get_global_position() - position).normalized())
 
 func movement():
 	if is_attacking:
@@ -120,7 +108,6 @@ func hit(damage: int, hit_direction: Vector2):
 		just_hit = true
 		just_hit_timer.start()
 		health -= damage
-		print('knockback')
 		knockback_direction = hit_direction
 		print("Player health: %s" % health)
 		if health < 0:
@@ -131,8 +118,6 @@ func knockback():
 		return
 	knocked_back = true
 	in_knockback_state = true
-	#var tween = create_tween()
-	#tween.tween_property(self, 'global_position', global_position + knockback_direction * 15, 0.2)
 	await get_tree().create_timer(1).timeout
 	knocked_back = false
 
