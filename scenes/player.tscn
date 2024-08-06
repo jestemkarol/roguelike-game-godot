@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://b3xl2512wepbf"]
+[gd_scene load_steps=55 format=3 uid="uid://b3xl2512wepbf"]
 
 [ext_resource type="Texture2D" uid="uid://b223n1gso3ifa" path="res://assets/characters/player.png" id="1_1ja81"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_ir52w"]
@@ -390,9 +390,6 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_e7lqa"]
 radius = 4.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_p5fji"]
-size = Vector2(13, 17)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o2ic1"]
 size = Vector2(25, 19.25)
 
@@ -412,12 +409,6 @@ offset = Vector2(0, -15)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_e7lqa")
-
-[node name="player_knockback_hitbox" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="player_knockback_hitbox"]
-position = Vector2(0.5, -6.5)
-shape = SubResource("RectangleShape2D_p5fji")
 
 [node name="player_hitbox" type="Area2D" parent="."]
 
@@ -444,7 +435,6 @@ one_shot = true
 wait_time = 0.3
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
-[connection signal="body_entered" from="player_knockback_hitbox" to="." method="_on_player_knockback_hitbox_body_entered"]
 [connection signal="body_entered" from="player_hitbox" to="." method="_on_player_hitbox_body_entered"]
 [connection signal="body_exited" from="player_hitbox" to="." method="_on_player_hitbox_body_exited"]
 [connection signal="timeout" from="just_hit_timer" to="." method="_on_just_hit_timer_timeout"]

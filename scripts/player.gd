@@ -8,6 +8,7 @@ extends CharacterBody2D
 @export var speed = 100
 @export var acceleration = 70
 @export var health = 100
+@export var hit_damage = 20
 
 const EnemyGroupName: String = 'enemy'
 const Directions: Dictionary = {DOWN = 'down', UP = 'up', RIGHT = 'right', LEFT = 'left'}
@@ -98,7 +99,8 @@ func attack() -> void:
 	deal_attack_timer.start()
 	play_animation(AnimationNames.ATTACK)
 	if enemy:
-		enemy.hit(20, (enemy.get_global_position() - position).normalized())
+		enemy.hit(hit_damage)
+		enemy.knockback((enemy.get_global_position() - position).normalized())
 
 func calculate_movement(delta) -> Vector2:
 	if is_attacking:
@@ -124,15 +126,23 @@ func play_animation(animation_stash):
 		dir = 'SIDE'
 	animation_player.play(animation_stash.get(dir))
 
-func hit(damage: int, hit_direction: Vector2):
+func hit(damage: int):
 	if !just_hit:
 		just_hit = true
 		just_hit_timer.start()
 		health -= damage
-		knockback_direction = hit_direction
+		
 		print("Player health: %s" % health)
 		if health < 0:
 			death()
+
+func knockback(hit_direction: Vector2) -> void:
+	if in_knockback_state:
+		return
+	in_knockback_state = true
+	knockback_direction = hit_direction
+	await get_tree().create_timer(5).timeout
+	in_knockback_state = false
 
 func death():
 	print('bye')

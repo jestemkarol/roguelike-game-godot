@@ -57,7 +57,8 @@ func _physics_process(delta: float) -> void:
 		attack_cooldown_timer.start()
 		play_animation(AttackAnimationNames)
 		if player:
-			player.hit(hit_damage, direction)
+			player.hit(hit_damage)
+			player.knockback(direction)
 	elif player_chase:
 		if !is_attacking:
 			direction = (player.get_global_position() - position).normalized()
@@ -80,12 +81,11 @@ func play_animation(animation_stash: Dictionary) -> void:
 	elif direction.y < direction.x && direction.y > -direction.x:
 		animation_player.play(animation_stash.SIDE)
 
-func hit(damage: int, hit_direction: Vector2) -> void:
+func hit(damage: int) -> void:
 	if !just_hit && !dead:
 		just_hit = true
 		just_hit_timer.start()
 		health -= damage
-		knockback_direction = hit_direction
 		print("Enemy health: %s" % health)
 		if health < 0:
 			death()
@@ -98,6 +98,15 @@ func apply_knockback(delta: float) -> Vector2:
 		in_knockback_state = false
 		knockback_direction = Vector2.ZERO
 		return Vector2.ZERO
+
+
+func knockback(hit_direction: Vector2) -> void:
+	if in_knockback_state:
+		return
+	knockback_direction = hit_direction
+	in_knockback_state = true
+	await get_tree().create_timer(1).timeout
+	in_knockback_state = false
 
 func death() -> void:
 	dead = true
@@ -130,11 +139,3 @@ func _on_attack_cooldown_timer_timeout() -> void:
 
 func _on_animated_sprite_2d_animation_finished() -> void:
 	is_attacking = false
-
-func _on_enemy_knockback_hitbox_body_entered(body: Node2D) -> void:
-	if body.is_in_group(PlayerGroupName) && just_hit && !in_knockback_state:
-		if in_knockback_state:
-			return
-		in_knockback_state = true
-		await get_tree().create_timer(1).timeout
-		in_knockback_state = false
