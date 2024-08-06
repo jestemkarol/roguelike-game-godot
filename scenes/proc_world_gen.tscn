@@ -1,0 +1,56 @@
+[gd_scene load_steps=9 format=3 uid="uid://balhakiefw0so"]
+
+[ext_resource type="Script" path="res://scripts/proc_world_gen.gd" id="1_1mskc"]
+[ext_resource type="TileSet" uid="uid://d02xumhclvqji" path="res://data/tilemap.tres" id="1_p76op"]
+[ext_resource type="PackedScene" uid="uid://b3xl2512wepbf" path="res://scenes/player.tscn" id="3_8op7g"]
+[ext_resource type="Script" path="res://scripts/ScriptHelpers.gd" id="4_4btny"]
+[ext_resource type="Script" path="res://scripts/world_gen/BorderAreaGenerator.gd" id="5_xac4r"]
+[ext_resource type="Script" path="res://scripts/world_gen/AreaSettings.gd" id="6_33jtd"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_4stwk"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6hxvo"]
+noise = SubResource("FastNoiseLite_4stwk")
+
+[node name="proc_world_gen" type="Node2D"]
+script = ExtResource("1_1mskc")
+noise_height_texture = SubResource("NoiseTexture2D_6hxvo")
+
+[node name="TileMap" type="TileMap" parent="."]
+unique_name_in_owner = true
+y_sort_enabled = true
+tile_set = ExtResource("1_p76op")
+format = 2
+layer_0/name = "Ground"
+layer_1/name = "Cliff"
+layer_1/y_sort_enabled = true
+layer_1/z_index = 1
+layer_1/tile_data = PackedInt32Array()
+layer_2/name = "Ysort"
+layer_2/y_sort_enabled = true
+layer_2/z_index = 1
+layer_2/tile_data = PackedInt32Array()
+
+[node name="Player" parent="." instance=ExtResource("3_8op7g")]
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+position = Vector2(0, -5)
+enabled = false
+zoom = Vector2(3.5, 3.5)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(1130, 626)
+zoom = Vector2(0.5, 0.5)
+
+[node name="generators" type="Node" parent="."]
+
+[node name="BorderAreaGenerator" type="Node" parent="generators"]
+script = ExtResource("5_xac4r")
+
+[node name="shared_scripts" type="Node" parent="."]
+
+[node name="AreaSettings" type="Node" parent="shared_scripts"]
+script = ExtResource("6_33jtd")
+
+[node name="ScriptHelpers" type="Node" parent="shared_scripts"]
+script = ExtResource("4_4btny")
