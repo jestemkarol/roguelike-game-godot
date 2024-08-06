@@ -6,6 +6,7 @@ extends CharacterBody2D
 @onready var player_hitbox: Area2D = $player_hitbox
 
 @export var speed = 100
+@export var acceleration = 70
 @export var health = 100
 
 const EnemyGroupName: String = 'enemy'
@@ -62,7 +63,7 @@ func player_movement(delta: float) -> void:
 func apply_knockback(delta):
 	if knockback_direction.length() > 0.01:  # Small threshold to stop knockback
 		knockback_direction = lerp(knockback_direction, Vector2.ZERO, knockback_weight)
-		velocity = knockback_direction * knockback_force
+		velocity = knockback_direction * knockback_force * acceleration * delta
 	else:
 		in_knockback_state = false
 		knockback_direction = Vector2.ZERO
@@ -71,7 +72,7 @@ func normal_movement(delta):
 	if Input.is_action_pressed('attack'):
 		attack()
 	input_direction = Input.get_vector('move_left', 'move_right', 'move_up', 'move_down')
-	velocity = movement()
+	velocity = calculate_movement(delta)
 
 func play_movement_animation() -> void:
 	if input_direction.y > input_direction.x && input_direction.y > -input_direction.x:
@@ -99,14 +100,14 @@ func attack() -> void:
 	if enemy:
 		enemy.hit(20, (enemy.get_global_position() - position).normalized())
 
-func movement():
+func calculate_movement(delta) -> Vector2:
 	if is_attacking:
 		return Vector2.ZERO
 	if input_direction != Vector2.ZERO:
 		play_movement_animation()
 	else:
 		play_animation(AnimationNames.IDLE)
-	return input_direction * speed
+	return input_direction * speed * acceleration * delta
 
 func switch_hitbox_shape(direction):
 	for shape in player_hitbox.get_children():
@@ -123,10 +124,6 @@ func play_animation(animation_stash):
 		dir = 'SIDE'
 	animation_player.play(animation_stash.get(dir))
 
-func _on_player_hitbox_body_entered(body: Node2D) -> void:
-	if body.is_in_group(EnemyGroupName):
-		enemy = body
-
 func hit(damage: int, hit_direction: Vector2):
 	if !just_hit:
 		just_hit = true
@@ -139,6 +136,10 @@ func hit(damage: int, hit_direction: Vector2):
 
 func death():
 	print('bye')
+
+func _on_player_hitbox_body_entered(body: Node2D) -> void:
+	if body.is_in_group(EnemyGroupName):
+		enemy = body
 
 func _on_just_hit_timer_timeout() -> void:
 	just_hit = false
