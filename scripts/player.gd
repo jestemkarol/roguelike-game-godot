@@ -5,7 +5,7 @@ extends CharacterBody2D
 @onready var deal_attack_timer: Timer = $deal_attack_timer
 @onready var player_hitbox: Area2D = $player_hitbox
 
-@export var speed = 100
+@export var speed = 200
 @export var acceleration = 70
 @export var health = 100
 @export var hit_damage = 20

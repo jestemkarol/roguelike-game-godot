@@ -430,48 +430,49 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_e7lqa"]
-radius = 4.0
+radius = 26.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o2ic1"]
-size = Vector2(35, 24.625)
+size = Vector2(170, 101.625)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iktgm"]
-size = Vector2(34, 27)
+size = Vector2(139, 100)
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_ir52w")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.25, 0.25)
 sprite_frames = SubResource("SpriteFrames_t6hxi")
-animation = &"attack_up"
+animation = &"attack_down"
 autoplay = "idle_down"
 offset = Vector2(0, -33)
+flip_h = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
-position = Vector2(0, -2)
+position = Vector2(0, -15)
 shape = SubResource("CircleShape2D_e7lqa")
 
 [node name="player_hitbox" type="Area2D" parent="."]
 
 [node name="up" type="CollisionShape2D" parent="player_hitbox"]
-position = Vector2(-0.5, -14.6875)
+visible = false
+position = Vector2(-4, -55)
 shape = SubResource("RectangleShape2D_o2ic1")
 
 [node name="right" type="CollisionShape2D" parent="player_hitbox"]
 visible = false
-position = Vector2(9, -9.5)
+position = Vector2(40, -44)
 shape = SubResource("RectangleShape2D_iktgm")
 
 [node name="left" type="CollisionShape2D" parent="player_hitbox"]
 visible = false
-position = Vector2(-8, -10)
+position = Vector2(-41, -44)
 shape = SubResource("RectangleShape2D_iktgm")
 
 [node name="down" type="CollisionShape2D" parent="player_hitbox"]
 visible = false
-position = Vector2(2, 2.5)
+position = Vector2(-14.5, 5)
 shape = SubResource("RectangleShape2D_iktgm")
 
 [node name="just_hit_timer" type="Timer" parent="."]

@@ -4,12 +4,11 @@
 [ext_resource type="TileSet" uid="uid://d02xumhclvqji" path="res://data/tilemap.tres" id="1_p76op"]
 [ext_resource type="PackedScene" uid="uid://b3xl2512wepbf" path="res://scenes/player.tscn" id="3_8op7g"]
 [ext_resource type="Script" path="res://scripts/ScriptHelpers.gd" id="4_4btny"]
-[ext_resource type="Script" path="res://scripts/world_gen/BorderAreaGenerator.gd" id="5_xac4r"]
-[ext_resource type="Script" path="res://scripts/world_gen/AreaSettings.gd" id="6_33jtd"]
+[ext_resource type="Script" path="res://scripts/AreaSettings.gd" id="6_33jtd"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_v0f4q"]
-noise_type = 4
-frequency = 0.0735
+noise_type = 3
+fractal_type = 0
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_0kud5"]
 width = 75
@@ -24,6 +23,50 @@ width = 75
 height = 50
 noise = SubResource("FastNoiseLite_2nv4w")
 
+[sub_resource type="GDScript" id="GDScript_hi6b0"]
+script/source = "extends Node
+
+class_name BorderAreaGenerator
+
+var tile_map: TileMap
+var noise: Noise
+
+var BORDER_AREAS: Dictionary
+var area_settings: AreaSettings
+var cliff_coords_array: Array = []
+
+func _init(tile_map: TileMap, noise: Noise, area_settings: AreaSettings) -> void:
+	self.tile_map = tile_map
+	self.noise = noise
+	self.area_settings = area_settings
+
+func initialize_borders() -> void:
+	BORDER_AREAS = {
+		\"top\": { \"top_corner\": Vector2i(-2, -2), \"bottom_corner\": Vector2i(area_settings.WIDTH + 2, 1) },
+		\"left\": { \"top_corner\": Vector2i(-2, -2), \"bottom_corner\": Vector2i(1, area_settings.HEIGHT + 2) },
+		\"right\": { \"top_corner\": Vector2i(AreaSettings.WIDTH - 2, -2), \"bottom_corner\": Vector2i(AreaSettings.WIDTH + 2, AreaSettings.HEIGHT + 2) },
+		\"bottom\": { \"top_corner\": Vector2i(-2, AreaSettings.HEIGHT - 2), \"bottom_corner\": Vector2i(AreaSettings.WIDTH + 2, AreaSettings.HEIGHT + 2) }
+	}
+	
+	collect_coords()
+
+func generate_borders() -> void:
+	initialize_borders()
+	generate_outer_borders()
+
+func generate_outer_borders() -> void:
+	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliff_coords_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
+
+func collect_coords() -> void:
+	for key in BORDER_AREAS.keys():
+		var top_corner = BORDER_AREAS[key][\"top_corner\"]
+		var bottom_corner = BORDER_AREAS[key][\"bottom_corner\"]
+		
+		for y in range(top_corner.y, bottom_corner.y + 1):
+			for x in range(top_corner.x, bottom_corner.x + 1):
+				cliff_coords_array.append(Vector2(x, y))
+"
+
 [node name="proc_world_gen" type="Node2D"]
 script = ExtResource("1_1mskc")
 noise_height_texture = SubResource("NoiseTexture2D_0kud5")
@@ -34,24 +77,29 @@ unique_name_in_owner = true
 y_sort_enabled = true
 tile_set = ExtResource("1_p76op")
 format = 2
-layer_0/name = "Ground"
-layer_1/name = "Cliff"
-layer_1/y_sort_enabled = true
-layer_1/z_index = 1
+layer_0/name = "Water"
+layer_0/z_index = -2
+layer_1/name = "Grass"
+layer_1/z_index = -1
 layer_1/tile_data = PackedInt32Array()
-layer_2/name = "Ysort"
-layer_2/y_sort_enabled = true
-layer_2/z_index = 1
+layer_2/name = "Path"
 layer_2/tile_data = PackedInt32Array()
+layer_3/name = "Cliff"
+layer_3/y_sort_enabled = true
+layer_3/z_index = 1
+layer_3/tile_data = PackedInt32Array()
+layer_4/name = "Ysort"
+layer_4/y_sort_enabled = true
+layer_4/z_index = 1
+layer_4/tile_data = PackedInt32Array()
 
 [node name="Player" parent="." instance=ExtResource("3_8op7g")]
-z_index = 1
+z_index = 2
 y_sort_enabled = true
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 position = Vector2(0, -5)
 ignore_rotation = false
-zoom = Vector2(3.5, 3.5)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(1130, 626)
@@ -62,7 +110,7 @@ zoom = Vector2(0.5, 0.5)
 [node name="generators" type="Node" parent="."]
 
 [node name="BorderAreaGenerator" type="Node" parent="generators"]
-script = ExtResource("5_xac4r")
+script = SubResource("GDScript_hi6b0")
 
 [node name="shared_scripts" type="Node" parent="."]
 

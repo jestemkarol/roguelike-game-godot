@@ -8,13 +8,10 @@ var paths_noise: Noise
 @onready var tile_map: TileMap = $TileMap
 @onready var player: CharacterBody2D = $Player
 
-@onready var AreaSettings = preload("res://scripts/world_gen/AreaSettings.gd")
+@onready var AreaSettings = preload("res://scripts/AreaSettings.gd")
 @onready var Helpers = preload("res://scripts/ScriptHelpers.gd")
 
-# Generators
-@onready var BorderAreaGenerator = preload("res://scripts/world_gen/BorderAreaGenerator.gd")
-
-var border_area_generator: BorderAreaGenerator
+var grass_array: Array = []
 var paths_array: Array = []
 var cliffs_array: Array = []
 
@@ -28,7 +25,6 @@ func _ready() -> void:
 	paths_noise.set_seed(randi())
 	initialize_constants()
 	var area_settings = AreaSettings.new()
-	border_area_generator = BorderAreaGenerator.new(tile_map, height_noise, area_settings)
 	generate_level()
 
 func initialize_constants() -> void:
@@ -38,24 +34,34 @@ func initialize_constants() -> void:
 	}
 
 func generate_level() -> void:
+	var arr = []
 	for x in range(AreaSettings.WIDTH):
 		for y in range(AreaSettings.HEIGHT):
 			var point = Vector2i(x, y)
 			var paths_noise_val = paths_noise.get_noise_2d(x, y)
 			var height_noise_val = height_noise.get_noise_2d(x, y)
-			set_grass(point)
-			if paths_noise_val > 0.0 && paths_noise_val < 0.1:
-				paths_array.append(point)
-			elif height_noise_val > 0.2:
-				cliffs_array.append(point)
-	
-	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.ground, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
-	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliffs_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
-	border_area_generator.generate_borders()
-	spawn_player()
 
-func set_grass(position: Vector2i) -> void:
-	tile_map.set_cell(AreaSettings.LAYERS.ground, position, AreaSettings.GRASS.source_id, AreaSettings.GRASS.atlas)
+			arr.append(height_noise_val)
+			tile_map.set_cell(AreaSettings.LAYERS.water, point, AreaSettings.WATER.source_id, AreaSettings.WATER.atlas)
+			if height_noise_val > -0.15:
+				grass_array.append(point)
+			if height_noise_val > 0.2:
+				cliffs_array.append(point)
+			if height_noise_val > 0.0 && height_noise_val < 0.05:
+				paths_array.append(point)
+	
+	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.grass, grass_array, AreaSettings.GRASS.terrain_set_id, AreaSettings.GRASS.terrain_id)
+	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
+	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliffs_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
+
+	spawn_player()
+	reset_stage(arr)
+
+func reset_stage(arr) -> void:
+	if arr.max() < 0.2 || arr.min() > -0.2:
+		print('Resetting world-gen, because of noise low: %s and high %s' % [arr.min(), arr.max()])
+		_ready()
+
 
 func spawn_player() -> void:
 	var attempts = 0

@@ -4,7 +4,7 @@ extends CharacterBody2D
 @onready var animation_player: AnimatedSprite2D = $AnimatedSprite2D
 @onready var attack_cooldown_timer: Timer = $attack_cooldown_timer
 
-@export var speed: int = 60
+@export var speed: int = 120
 @export var health: int = 50
 @export var hit_damage: int = 10
 

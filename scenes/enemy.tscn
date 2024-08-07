@@ -505,19 +505,18 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_0rqlw"]
-radius = 92.0054
+radius = 408.397
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_p1m0t"]
-radius = 3.0
+radius = 23.0868
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mhqt0"]
-radius = 12.0
+radius = 78.2304
 
 [node name="Enemy" type="CharacterBody2D" groups=["enemy", "slime"]]
 script = ExtResource("1_8s7k4")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.2, 0.2)
 sprite_frames = SubResource("SpriteFrames_g05vj")
 animation = &"death"
 autoplay = "idle_down"
@@ -526,11 +525,11 @@ offset = Vector2(0, -26)
 [node name="DetectionArea" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
-visible = false
 shape = SubResource("CircleShape2D_0rqlw")
 
 [node name="enemy_collision_shape" type="CollisionShape2D" parent="."]
-position = Vector2(0, -1)
+visible = false
+position = Vector2(1, -8)
 shape = SubResource("CircleShape2D_p1m0t")
 
 [node name="enemy_hitbox" type="Area2D" parent="."]
