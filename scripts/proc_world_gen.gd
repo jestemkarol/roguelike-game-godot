@@ -1,102 +1,156 @@
 extends Node2D
 
+# Exported variables for textures
 @export var noise_height_texture: NoiseTexture2D
 @export var noise_trees_texture: NoiseTexture2D
-var height_noise: Noise
-var trees_noise: Noise
 
+# Onready variables for nodes and resources
 @onready var tile_map: TileMap = $TileMap
 @onready var player: CharacterBody2D = $Player
-
 @onready var AreaSettings = preload("res://scripts/AreaSettings.gd")
 @onready var Helpers = preload("res://scripts/ScriptHelpers.gd")
 
+var height_noise: Noise
+var trees_noise: Noise
 var grass_array: Array = []
 var paths_array: Array = []
 var cliffs_array: Array = []
 var trees_array: Array = []
 
+# Report vars
+var cliff_density_reached: bool = false
+
 var PLAYER_SPAWN_AREA: Dictionary
+var MAX_CLIFF_TILES: int
 
 func _ready() -> void:
+	_initialize_noise()
+	_initialize_constants()
+	generate_level()
+
+func _initialize_noise() -> void:
 	randomize()
 	height_noise = noise_height_texture.noise
 	trees_noise = noise_trees_texture.noise
 	height_noise.set_seed(randi())
 	trees_noise.set_seed(randi())
-	initialize_constants()
-	var area_settings = AreaSettings.new()
-	generate_level()
 
-func initialize_constants() -> void:
+func _initialize_constants() -> void:
 	PLAYER_SPAWN_AREA = {
 		"top_left": Vector2i(5, 5),
 		"bottom_right": Vector2i(AreaSettings.WIDTH - 5, AreaSettings.HEIGHT - 5)
 	}
+	MAX_CLIFF_TILES = int(float(AreaSettings.WIDTH * AreaSettings.HEIGHT) * AreaSettings.MAX_CLIFF_TILES_DENSITY)
 
 func generate_level() -> void:
-	var arr = []
+	var height_values = _generate_terrain()
+	_set_tile_terrain()
+	_set_objects()
+	_spawn_player()
+	_check_reset_stage(height_values)
+	_log_report()
+
+func _generate_terrain() -> Array:
+	var height_values = []
 	for x in range(AreaSettings.WIDTH):
 		for y in range(AreaSettings.HEIGHT):
 			var point = Vector2i(x, y)
-			var trees_noise_val = trees_noise.get_noise_2d(x, y)
 			var height_noise_val = height_noise.get_noise_2d(x, y)
+			var trees_noise_val = trees_noise.get_noise_2d(x, y)
 
-			arr.append(height_noise_val)
-			tile_map.set_cell(AreaSettings.LAYERS.water, point, AreaSettings.WATER.source_id, AreaSettings.WATER.atlas)
-			if height_noise_val > -0.15:
-				grass_array.append(point)
-				if trees_noise_val > 0.75 && height_noise_val < 0.15:
-					trees_array.append(point)
-			if height_noise_val > 0.2:
-				cliffs_array.append(point)
-			if height_noise_val > 0.0 && height_noise_val < 0.05:
-				paths_array.append(point)
-	
+			height_values.append(height_noise_val)
+			_categorize_point(point, height_noise_val, trees_noise_val)
+			_set_initial_tile(point, height_noise_val)
+	_remove_duplicates()
+	return height_values
+
+func _categorize_point(point: Vector2i, height_noise_val: float, trees_noise_val: float) -> void:
+	if height_noise_val > -0.15:
+		grass_array.append(point)
+		if trees_noise_val > 0.75 && height_noise_val < 0.15:
+			trees_array.append(point)
+	if height_noise_val > 0.35:
+		if cliffs_array.size() < MAX_CLIFF_TILES:
+			cliffs_array.append(point)
+		else:
+			cliff_density_reached = true
+	if height_noise_val > 0.0 && height_noise_val < 0.05:
+		paths_array.append(point)
+
+func _remove_duplicates() -> void:
+	grass_array = _make_unique(grass_array)
+	trees_array = _make_unique(trees_array)
+	cliffs_array = _make_unique(cliffs_array)
+	paths_array = _make_unique(paths_array)
+
+func _make_unique(array: Array) -> Array:
+	var unique_set = {}
+	for element in array:
+		unique_set[element] = true
+	return unique_set.keys()
+
+func _set_initial_tile(point: Vector2i, height_noise_val: float) -> void:
+	tile_map.set_cell(AreaSettings.LAYERS.water, point, AreaSettings.WATER.source_id, AreaSettings.WATER.atlas)
+
+func _set_tile_terrain() -> void:
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.grass, grass_array, AreaSettings.GRASS.terrain_set_id, AreaSettings.GRASS.terrain_id)
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliffs_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
 
-	set_objects()
-	spawn_player()
-	reset_stage(arr)
+func _set_objects() -> void:
+	var trees_array_copy = trees_array.duplicate()
+	while !trees_array_copy.is_empty():
+		var tree_spawn_coords = trees_array_copy.pop_back()
+		
+		# Check if the position is occupied by a cliff or path
+		if !(tree_spawn_coords in cliffs_array || tree_spawn_coords in paths_array):
+			# Check bordering positions for cliffs
+			var should_set_tree = true
+			for offset in [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1), Vector2i(0, 1)]:
+				var neighbor = tree_spawn_coords + offset
+				if neighbor in cliffs_array:
+					should_set_tree = false
+					break
 
-func set_objects() -> void:
-	var tree_spawn_coords = null
-	while !trees_array.is_empty():
-		tree_spawn_coords = trees_array.pop_back()
-		var cliff_layer_tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.cliff, tree_spawn_coords)
-		var grass_layer_tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.grass, tree_spawn_coords)
-		if !cliff_layer_tile_data && grass_layer_tile_data:
-			set_tree(tree_spawn_coords)
+			if should_set_tree:
+				_set_tree(tree_spawn_coords)
 
-func set_tree(point: Vector2i) -> void:
+func _set_tree(point: Vector2i) -> void:
 	tile_map.set_cell(AreaSettings.LAYERS.objects, point, AreaSettings.OBJECTS.tree.source_id, AreaSettings.OBJECTS.tree.atlas)
 
-func reset_stage(arr) -> void:
-	if arr.max() < 0.2 || arr.min() > -0.2:
-		print('Resetting world-gen, because of noise low: %s and high %s' % [arr.min(), arr.max()])
+func _check_reset_stage(height_values: Array) -> void:
+	var map_size = AreaSettings.HEIGHT * AreaSettings.WIDTH
+	var land_density = float(grass_array.size()) / float(map_size) * 100.0
+	if height_values.max() < 0.4 || height_values.max() > 0.5 || height_values.min() > -0.2:
+		print('Resetting world-gen, because of noise low: %s and high %s' % [height_values.min(), height_values.max()])
+		_ready()
+	if land_density < AreaSettings.LAND_DENSITY_MIN:
+		print('Resetting world-gen, because of non sufficient land density: %s%%' % land_density)
 		_ready()
 
-func spawn_player() -> void:
-	var attempts = 0
-	var max_attempts = 30
-	var player_position = Vector2()
-	var tile_data = null
-	
-	while attempts < max_attempts:
-		player_position = Helpers.get_random_point_in_area(PLAYER_SPAWN_AREA.top_left, PLAYER_SPAWN_AREA.bottom_right)
-		tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.cliff, player_position)
+
+func _log_report() -> void:
+	var tiles_no_arr = [cliffs_array.size(), grass_array.size(), paths_array.size(), trees_array.size()]
+	var map_size = AreaSettings.HEIGHT * AreaSettings.WIDTH
+	var land_density = float(grass_array.size()) / float(map_size) * 100.0
+	if cliff_density_reached:
+		print('[WORLD-GEN]: Too many cliffs ffs! No. reached after cutoff: ', cliffs_array.size())
+	print('[WORLD-GEN]: Generated %s cliff tiles, %s grass tiles, %s path tiles, %s trees tiles' % tiles_no_arr)
+	print('[WORLD-GEN]: Map size: ', map_size)
+	print('[WORLD-GEN]: Land density: %s%%' % land_density)
+
+func _spawn_player() -> void:
+	grass_array.shuffle()
+	for grass_point in grass_array:
+		var tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.cliff, grass_point)
 		
 		if !tile_data:
-			player.global_position = tile_map.map_to_local(player_position)
-			print('Player spawned successfully after ', attempts + 1, ' attempts.')
-			print('Player pos: ', player_position)
+			player.global_position = tile_map.map_to_local(grass_point)
+			print('Player spawned successfully at %s.' % grass_point)
 			return
 		else:
-			print('[%s] Tried to spawn at %s, but tile_data.terrain: %s, terrain_set: %s' % [attempts, player_position, tile_data.terrain, tile_data.terrain_set])
-			attempts += 1
+			print('Tried to spawn at %s, but cliff tile detected.' % grass_point)
 	
-	# If the loop completes without finding a suitable tile, restart the setup
-	print("Failed to find a suitable grass tile for player spawn after %d attempts. Restarting setup..." % max_attempts)
-	_ready()  # Call the _ready() function to reset the setup
+	# If no suitable grass tile is found, restart the setup
+	print("Failed to find a suitable grass tile for player spawn. Restarting setup...")
+	_ready()

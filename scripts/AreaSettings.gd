@@ -7,6 +7,10 @@ class_name AreaSettings
 const HEIGHT = 50
 const WIDTH = 75
 
+const LAND_DENSITY_MIN = 75.0
+
+const MAX_CLIFF_TILES_DENSITY = 0.1
+
 # Layers
 const LAYERS = {
 	"water": 0,
