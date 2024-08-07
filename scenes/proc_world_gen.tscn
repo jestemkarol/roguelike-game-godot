@@ -1,15 +1,18 @@
-[gd_scene load_steps=9 format=3 uid="uid://balhakiefw0so"]
+[gd_scene load_steps=10 format=3 uid="uid://balhakiefw0so"]
 
 [ext_resource type="Script" path="res://scripts/proc_world_gen.gd" id="1_1mskc"]
 [ext_resource type="TileSet" uid="uid://d02xumhclvqji" path="res://data/tilemap.tres" id="1_p76op"]
 [ext_resource type="PackedScene" uid="uid://b3xl2512wepbf" path="res://scenes/player.tscn" id="3_8op7g"]
 [ext_resource type="Script" path="res://scripts/ScriptHelpers.gd" id="4_4btny"]
+[ext_resource type="Script" path="res://scripts/world_gen/PathsGenerator.gd" id="5_kw1ub"]
 [ext_resource type="Script" path="res://scripts/world_gen/BorderAreaGenerator.gd" id="5_xac4r"]
 [ext_resource type="Script" path="res://scripts/world_gen/AreaSettings.gd" id="6_33jtd"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_4stwk"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6hxvo"]
+width = 75
+height = 100
 noise = SubResource("FastNoiseLite_4stwk")
 
 [node name="proc_world_gen" type="Node2D"]
@@ -46,6 +49,9 @@ zoom = Vector2(0.5, 0.5)
 
 [node name="BorderAreaGenerator" type="Node" parent="generators"]
 script = ExtResource("5_xac4r")
+
+[node name="PathsGenerator" type="Node" parent="generators"]
+script = ExtResource("5_kw1ub")
 
 [node name="shared_scripts" type="Node" parent="."]
 

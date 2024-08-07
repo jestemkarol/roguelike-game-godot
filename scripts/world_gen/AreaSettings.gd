@@ -3,12 +3,13 @@ extends Node
 class_name AreaSettings
 
 # Area size
+# REMEMBER if changing to change Noise H&W
 const HEIGHT = 75
 const WIDTH = 100
 
 # Layers
 const LAYERS = {
-	"grass": 0,
+	"ground": 0,
 	"cliff": 1,
 	"objects": 2
 }
@@ -32,3 +33,9 @@ const CLIFFS = {
 	"left_outer": Vector2i(1, 5),
 	"right_outer": Vector2i(3, 5)
 }
+
+const PATH = {
+	"source_id": 1,
+	"atlas": Vector2i(2, 1)
+}
+

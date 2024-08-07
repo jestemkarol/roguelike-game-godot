@@ -11,8 +11,10 @@ var noise: Noise
 
 # Generators
 @onready var BorderAreaGenerator = preload("res://scripts/world_gen/BorderAreaGenerator.gd")
+@onready var PathsGenerator = preload("res://scripts/world_gen/PathsGenerator.gd")
 
 var border_area_generator: BorderAreaGenerator
+var paths_generator: PathsGenerator
 
 var PLAYER_SPAWN_AREA: Dictionary
 
@@ -20,7 +22,9 @@ func _ready() -> void:
 	randomize()
 	noise = noise_height_texture.noise
 	initialize_constants()
-	border_area_generator = BorderAreaGenerator.new(tile_map, noise, AreaSettings.new())
+	var area_settings = AreaSettings.new()
+	border_area_generator = BorderAreaGenerator.new(tile_map, noise, area_settings)
+	paths_generator = PathsGenerator.new(tile_map, noise, area_settings)
 	generate_level()
 
 func initialize_constants() -> void:
@@ -31,12 +35,16 @@ func initialize_constants() -> void:
 func generate_level() -> void:
 	for x in range(AreaSettings.WIDTH):
 		for y in range(AreaSettings.HEIGHT):
-			set_grass(Vector2i(x, y))
-			border_area_generator.generate_closed_borders(Vector2i(x, y))
+			var point = Vector2i(x, y)
+			var noise_val = noise.get_noise_2d(x, y)
+			set_grass(point)
+			if noise_val > 0.0 && noise_val < 0.1:
+				paths_generator.generate_paths(point)
+			border_area_generator.generate_closed_borders(point)
 	spawn_player()
 
 func set_grass(position: Vector2i) -> void:
-	tile_map.set_cell(AreaSettings.LAYERS.grass, position, AreaSettings.GRASS.source_id, AreaSettings.GRASS.atlas)
+	tile_map.set_cell(AreaSettings.LAYERS.ground, position, AreaSettings.GRASS.source_id, AreaSettings.GRASS.atlas)
 
 func spawn_player() -> void:
 	var player_position = Helpers.get_random_point_in_area(PLAYER_SPAWN_AREA.top_left, PLAYER_SPAWN_AREA.bottom_right)
