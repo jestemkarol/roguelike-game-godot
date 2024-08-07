@@ -23,15 +23,8 @@ const GRASS = {
 # Cliffs
 const CLIFFS = {
 	"source_id": 1,
-	"inner": Vector2i(2, 5),
-	"top_inner_left": Vector2i(4, 5),
-	"top_outer": Vector2i(2, 4),
-	"top_inner_right": Vector2i(5, 5),
-	"bottom_inner_left": Vector2i(4, 4),
-	"bottom_outer_top": Vector2i(2, 6),
-	"bottom_inner_right": Vector2i(5, 4),
-	"left_outer": Vector2i(1, 5),
-	"right_outer": Vector2i(3, 5)
+	"terrain_set_id": 1,
+	"terrain_id": 0
 }
 
 const PATH = {

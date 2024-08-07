@@ -6,11 +6,8 @@ var tile_map: TileMap
 var noise: Noise
 
 var BORDER_AREAS: Dictionary
-var INNER_BORDER_AREA: Dictionary
-var INNER_BORDER_CORNERS: Dictionary
-var INNER_BORDER_ATLAS_MAPPING: Dictionary
-var INNER_BORDER_CORNERS_ATLAS_MAPPING: Dictionary
 var area_settings: AreaSettings
+var cliff_coords_array: Array = []
 
 func _init(tile_map: TileMap, noise: Noise, area_settings: AreaSettings) -> void:
 	self.tile_map = tile_map
@@ -19,61 +16,26 @@ func _init(tile_map: TileMap, noise: Noise, area_settings: AreaSettings) -> void
 
 func initialize_borders() -> void:
 	BORDER_AREAS = {
-		"top": { "top_corner": Vector2i(0, 0), "bottom_corner": Vector2i(area_settings.WIDTH - 1, 1) },
-		"left": { "top_corner": Vector2i(0, 0), "bottom_corner": Vector2i(1, area_settings.HEIGHT - 1) },
-		"right": { "top_corner": Vector2i(AreaSettings.WIDTH - 1, 0), "bottom_corner": Vector2i(AreaSettings.WIDTH - 2, AreaSettings.HEIGHT - 1) },
-		"bottom": { "top_corner": Vector2i(0, AreaSettings.HEIGHT - 2), "bottom_corner": Vector2i(AreaSettings.WIDTH - 1, AreaSettings.HEIGHT - 1) }
+		"top": { "top_corner": Vector2i(-2, -2), "bottom_corner": Vector2i(area_settings.WIDTH + 2, 1) },
+		"left": { "top_corner": Vector2i(-2, -2), "bottom_corner": Vector2i(1, area_settings.HEIGHT + 2) },
+		"right": { "top_corner": Vector2i(AreaSettings.WIDTH - 2, -2), "bottom_corner": Vector2i(AreaSettings.WIDTH + 2, AreaSettings.HEIGHT + 2) },
+		"bottom": { "top_corner": Vector2i(-2, AreaSettings.HEIGHT - 2), "bottom_corner": Vector2i(AreaSettings.WIDTH + 2, AreaSettings.HEIGHT + 2) }
 	}
+	
+	collect_coords()
 
-	INNER_BORDER_AREA = {
-		"top": { "top_corner": Vector2i(3, 2), "bottom_corner": Vector2i(AreaSettings.WIDTH - 4, 2) },
-		"left": { "top_corner": Vector2i(2, 3), "bottom_corner": Vector2i(2, AreaSettings.HEIGHT - 4) },
-		"right": { "top_corner": Vector2i(AreaSettings.WIDTH - 3, 3), "bottom_corner": Vector2i(AreaSettings.WIDTH - 3, AreaSettings.HEIGHT - 4) },
-		"bottom": { "top_corner": Vector2i(3, AreaSettings.HEIGHT - 3), "bottom_corner": Vector2i(AreaSettings.WIDTH - 4, AreaSettings.HEIGHT - 3) }
-	}
-
-	INNER_BORDER_CORNERS = {
-		"top_left": Vector2i(2, 2),
-		"top_right": Vector2i(AreaSettings.WIDTH - 3, 2),
-		"bottom_left": Vector2i(2, AreaSettings.HEIGHT - 3),
-		"bottom_right": Vector2i(AreaSettings.WIDTH - 3, AreaSettings.HEIGHT - 3)
-	}
-
-	INNER_BORDER_ATLAS_MAPPING = {
-		"top": AreaSettings.CLIFFS.bottom_outer_top,
-		"left": AreaSettings.CLIFFS.right_outer,
-		"right": AreaSettings.CLIFFS.left_outer,
-		"bottom": AreaSettings.CLIFFS.top_outer
-	}
-
-	INNER_BORDER_CORNERS_ATLAS_MAPPING = {
-		"top_left": AreaSettings.CLIFFS.bottom_inner_left,
-		"top_right": AreaSettings.CLIFFS.bottom_inner_right,
-		"bottom_left": AreaSettings.CLIFFS.top_inner_left,
-		"bottom_right": AreaSettings.CLIFFS.top_inner_right
-	}
-
-func generate_closed_borders(position: Vector2i) -> void:
+func generate_borders() -> void:
 	initialize_borders()
-	generate_outer_borders(position)
-	generate_inner_borders(position)
-	generate_inner_border_corners(position)
+	generate_outer_borders()
 
-func generate_inner_border_corners(position: Vector2i) -> void:
-	for corner in INNER_BORDER_CORNERS.keys():
-		if position == INNER_BORDER_CORNERS[corner]:
-			tile_map.set_cell(AreaSettings.LAYERS.cliff, position, AreaSettings.CLIFFS.source_id, INNER_BORDER_CORNERS_ATLAS_MAPPING[corner])
-			return
+func generate_outer_borders() -> void:
+	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliff_coords_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
 
-func generate_outer_borders(position: Vector2i) -> void:
-	for border in BORDER_AREAS.values():
-		if Helpers.is_point_in_area(position, border["top_corner"], border["bottom_corner"]):
-			tile_map.set_cell(AreaSettings.LAYERS.cliff, position, AreaSettings.CLIFFS.source_id, AreaSettings.CLIFFS.inner)
-			return
-
-func generate_inner_borders(position: Vector2i) -> void:
-	for side in INNER_BORDER_AREA.keys():
-		var area = INNER_BORDER_AREA[side]
-		if Helpers.is_point_in_area(position, area["top_corner"], area["bottom_corner"]):
-			tile_map.set_cell(AreaSettings.LAYERS.cliff, position, AreaSettings.CLIFFS.source_id, INNER_BORDER_ATLAS_MAPPING[side])
-			return
+func collect_coords() -> void:
+	for key in BORDER_AREAS.keys():
+		var top_corner = BORDER_AREAS[key]["top_corner"]
+		var bottom_corner = BORDER_AREAS[key]["bottom_corner"]
+		
+		for y in range(top_corner.y, bottom_corner.y + 1):
+			for x in range(top_corner.x, bottom_corner.x + 1):
+				cliff_coords_array.append(Vector2(x, y))

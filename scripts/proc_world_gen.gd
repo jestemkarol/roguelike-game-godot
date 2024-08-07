@@ -40,8 +40,8 @@ func generate_level() -> void:
 			if noise_val > 0.0 && noise_val < 0.1:
 				paths_array.append(point)
 	
-	print(paths_array)
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.ground, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
+	border_area_generator.generate_borders()
 	spawn_player()
 
 func set_grass(position: Vector2i) -> void:
