@@ -1,9 +1,9 @@
 extends Node2D
 
 @export var noise_height_texture: NoiseTexture2D
-@export var noise_paths_texture: NoiseTexture2D
+@export var noise_trees_texture: NoiseTexture2D
 var height_noise: Noise
-var paths_noise: Noise
+var trees_noise: Noise
 
 @onready var tile_map: TileMap = $TileMap
 @onready var player: CharacterBody2D = $Player
@@ -20,9 +20,9 @@ var PLAYER_SPAWN_AREA: Dictionary
 func _ready() -> void:
 	randomize()
 	height_noise = noise_height_texture.noise
-	paths_noise = noise_paths_texture.noise
+	trees_noise = noise_trees_texture.noise
 	height_noise.set_seed(randi())
-	paths_noise.set_seed(randi())
+	trees_noise.set_seed(randi())
 	initialize_constants()
 	var area_settings = AreaSettings.new()
 	generate_level()
@@ -38,13 +38,15 @@ func generate_level() -> void:
 	for x in range(AreaSettings.WIDTH):
 		for y in range(AreaSettings.HEIGHT):
 			var point = Vector2i(x, y)
-			var paths_noise_val = paths_noise.get_noise_2d(x, y)
+			var trees_noise_val = trees_noise.get_noise_2d(x, y)
 			var height_noise_val = height_noise.get_noise_2d(x, y)
 
 			arr.append(height_noise_val)
 			tile_map.set_cell(AreaSettings.LAYERS.water, point, AreaSettings.WATER.source_id, AreaSettings.WATER.atlas)
 			if height_noise_val > -0.15:
 				grass_array.append(point)
+				if trees_noise_val > 0.75 && height_noise_val < 0.15:
+					set_tree(point)
 			if height_noise_val > 0.2:
 				cliffs_array.append(point)
 			if height_noise_val > 0.0 && height_noise_val < 0.05:
@@ -57,11 +59,14 @@ func generate_level() -> void:
 	spawn_player()
 	reset_stage(arr)
 
+func set_tree(point: Vector2i) -> void:
+	var atlas = AreaSettings.OBJECTS.tree.atlas_points
+	tile_map.set_cell(AreaSettings.LAYERS.objects, point, AreaSettings.OBJECTS.tree.source_id, atlas[randi() % atlas.size()])
+
 func reset_stage(arr) -> void:
 	if arr.max() < 0.2 || arr.min() > -0.2:
 		print('Resetting world-gen, because of noise low: %s and high %s' % [arr.min(), arr.max()])
 		_ready()
-
 
 func spawn_player() -> void:
 	var attempts = 0

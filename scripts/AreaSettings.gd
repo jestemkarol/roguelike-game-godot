@@ -21,17 +21,9 @@ const WATER = {
 	"atlas": Vector2i(0,0)
 }
 
-# Grass
 const GRASS = {
 	"source_id": 8,
 	"terrain_set_id": 1,
-	"terrain_id": 0
-}
-
-# Cliffs
-const CLIFFS = {
-	"source_id": 9,
-	"terrain_set_id": 2,
 	"terrain_id": 0
 }
 
@@ -41,3 +33,15 @@ const PATH = {
 	"terrain_id": 1
 }
 
+const CLIFFS = {
+	"source_id": 9,
+	"terrain_set_id": 2,
+	"terrain_id": 0
+}
+
+const OBJECTS = {
+	"tree": {
+		"source_id": 10,
+		"atlas_points": [Vector2i(0,0), Vector2i(3,0), Vector2i(6,0), Vector2i(9,0), Vector2i(0,3), Vector2i(0,6)]
+	}
+}
