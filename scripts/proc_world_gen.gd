@@ -12,9 +12,11 @@ var noise: Noise
 # Generators
 @onready var BorderAreaGenerator = preload("res://scripts/world_gen/BorderAreaGenerator.gd")
 @onready var PathsGenerator = preload("res://scripts/world_gen/PathsGenerator.gd")
+@onready var PathsBordersGenerator = preload("res://scripts/world_gen/PathsBordersGenerator.gd")
 
 var border_area_generator: BorderAreaGenerator
 var paths_generator: PathsGenerator
+var paths_borders_generator: PathsBordersGenerator
 
 var PLAYER_SPAWN_AREA: Dictionary
 
@@ -25,7 +27,9 @@ func _ready() -> void:
 	var area_settings = AreaSettings.new()
 	border_area_generator = BorderAreaGenerator.new(tile_map, noise, area_settings)
 	paths_generator = PathsGenerator.new(tile_map, noise, area_settings)
+	paths_borders_generator = PathsBordersGenerator.new(tile_map, area_settings)
 	generate_level()
+	paths_borders_generator.generate_paths_borders()
 
 func initialize_constants() -> void:
 	PLAYER_SPAWN_AREA = {

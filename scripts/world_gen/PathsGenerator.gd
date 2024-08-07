@@ -12,5 +12,4 @@ func _init(tile_map: TileMap, noise: Noise, area_settings: AreaSettings) -> void
 	self.area_settings = area_settings
 
 func generate_paths(position: Vector2i) -> void:
-	tile_map.set_cell(AreaSettings.LAYERS.ground, position, AreaSettings.PATH.source_id, AreaSettings.PATH.atlas)
-
+	tile_map.set_cell(AreaSettings.LAYERS.ground, position, AreaSettings.PATH.source_id, AreaSettings.PATH.inner)
