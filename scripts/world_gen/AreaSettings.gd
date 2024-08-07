@@ -35,27 +35,7 @@ const CLIFFS = {
 }
 
 const PATH = {
-	"source_id": 1,
-	"inner": Vector2i(2, 1),
-	"top": {
-		"standard": Vector2i(2 ,0),
-		"right_outer": Vector2i(4 ,1),
-		"left_outer": Vector2i(5, 1)
-	},
-	"bottom": {
-		"standard": Vector2i(2, 2),
-		"right_outer": Vector2i(4 ,0),
-		"left_outer": Vector2i(5, 0)
-	},
-	"left": {
-		"standard": Vector2i(1 ,1),
-		"top_inner": Vector2i(1 ,0),
-		"bottom_inner": Vector2i(1 ,2)
-	},
-	"right": {
-		"standard": Vector2i(3 ,1),
-		"top_inner": Vector2i(3 ,0),
-		"bottom_inner": Vector2i(3 ,2)
-	}
+	"terrain_set_id": 0,
+	"terrain_id": 0
 }
 
