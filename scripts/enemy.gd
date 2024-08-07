@@ -4,7 +4,7 @@ extends CharacterBody2D
 @onready var animation_player: AnimatedSprite2D = $AnimatedSprite2D
 @onready var attack_cooldown_timer: Timer = $attack_cooldown_timer
 
-@export var speed: int = 80
+@export var speed: int = 60
 @export var health: int = 50
 @export var hit_damage: int = 10
 
@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 		play_animation(AttackAnimationNames)
 		if player:
 			player.hit(hit_damage)
-			player.knockback(direction)
+			#player.knockback(direction)
 	elif player_chase:
 		if !is_attacking:
 			direction = (player.get_global_position() - position).normalized()
