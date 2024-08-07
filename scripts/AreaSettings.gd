@@ -42,6 +42,6 @@ const CLIFFS = {
 const OBJECTS = {
 	"tree": {
 		"source_id": 10,
-		"atlas_points": [Vector2i(0,0), Vector2i(3,0), Vector2i(6,0), Vector2i(9,0), Vector2i(0,3), Vector2i(0,6)]
+		"atlas": Vector2i(0,0)
 	}
 }

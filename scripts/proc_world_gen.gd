@@ -71,8 +71,7 @@ func set_objects() -> void:
 			set_tree(tree_spawn_coords)
 
 func set_tree(point: Vector2i) -> void:
-	var atlas = AreaSettings.OBJECTS.tree.atlas_points
-	tile_map.set_cell(AreaSettings.LAYERS.objects, point, AreaSettings.OBJECTS.tree.source_id, atlas[randi() % atlas.size()])
+	tile_map.set_cell(AreaSettings.LAYERS.objects, point, AreaSettings.OBJECTS.tree.source_id, AreaSettings.OBJECTS.tree.atlas)
 
 func reset_stage(arr) -> void:
 	if arr.max() < 0.2 || arr.min() > -0.2:
