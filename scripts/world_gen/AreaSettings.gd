@@ -4,8 +4,8 @@ class_name AreaSettings
 
 # Area size
 # REMEMBER if changing to change Noise H&W
-const HEIGHT = 75
-const WIDTH = 100
+const HEIGHT = 50
+const WIDTH = 75
 
 # Layers
 const LAYERS = {

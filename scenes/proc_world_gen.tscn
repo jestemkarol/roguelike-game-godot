@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://balhakiefw0so"]
+[gd_scene load_steps=11 format=3 uid="uid://balhakiefw0so"]
 
 [ext_resource type="Script" path="res://scripts/proc_world_gen.gd" id="1_1mskc"]
 [ext_resource type="TileSet" uid="uid://d02xumhclvqji" path="res://data/tilemap.tres" id="1_p76op"]
@@ -7,18 +7,27 @@
 [ext_resource type="Script" path="res://scripts/world_gen/BorderAreaGenerator.gd" id="5_xac4r"]
 [ext_resource type="Script" path="res://scripts/world_gen/AreaSettings.gd" id="6_33jtd"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_4stwk"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_v0f4q"]
 noise_type = 4
-seed = 4
+frequency = 0.0735
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6hxvo"]
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_0kud5"]
 width = 75
-height = 100
-noise = SubResource("FastNoiseLite_4stwk")
+height = 50
+noise = SubResource("FastNoiseLite_v0f4q")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_2nv4w"]
+noise_type = 4
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3an7q"]
+width = 75
+height = 50
+noise = SubResource("FastNoiseLite_2nv4w")
 
 [node name="proc_world_gen" type="Node2D"]
 script = ExtResource("1_1mskc")
-noise_height_texture = SubResource("NoiseTexture2D_6hxvo")
+noise_height_texture = SubResource("NoiseTexture2D_0kud5")
+noise_paths_texture = SubResource("NoiseTexture2D_3an7q")
 
 [node name="TileMap" type="TileMap" parent="."]
 unique_name_in_owner = true
@@ -36,15 +45,18 @@ layer_2/z_index = 1
 layer_2/tile_data = PackedInt32Array()
 
 [node name="Player" parent="." instance=ExtResource("3_8op7g")]
-z_index = 2
+z_index = 1
+y_sort_enabled = true
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 position = Vector2(0, -5)
+ignore_rotation = false
 enabled = false
-zoom = Vector2(2.5, 2.5)
+zoom = Vector2(2, 2)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(1130, 626)
+ignore_rotation = false
 zoom = Vector2(0.5, 0.5)
 
 [node name="generators" type="Node" parent="."]
