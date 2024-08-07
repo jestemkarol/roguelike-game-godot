@@ -14,6 +14,7 @@ var trees_noise: Noise
 var grass_array: Array = []
 var paths_array: Array = []
 var cliffs_array: Array = []
+var trees_array: Array = []
 
 var PLAYER_SPAWN_AREA: Dictionary
 
@@ -46,7 +47,7 @@ func generate_level() -> void:
 			if height_noise_val > -0.15:
 				grass_array.append(point)
 				if trees_noise_val > 0.75 && height_noise_val < 0.15:
-					set_tree(point)
+					trees_array.append(point)
 			if height_noise_val > 0.2:
 				cliffs_array.append(point)
 			if height_noise_val > 0.0 && height_noise_val < 0.05:
@@ -56,8 +57,18 @@ func generate_level() -> void:
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliffs_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
 
+	set_objects()
 	spawn_player()
 	reset_stage(arr)
+
+func set_objects() -> void:
+	var tree_spawn_coords = null
+	while !trees_array.is_empty():
+		tree_spawn_coords = trees_array.pop_back()
+		var cliff_layer_tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.cliff, tree_spawn_coords)
+		var grass_layer_tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.grass, tree_spawn_coords)
+		if !cliff_layer_tile_data && grass_layer_tile_data:
+			set_tree(tree_spawn_coords)
 
 func set_tree(point: Vector2i) -> void:
 	var atlas = AreaSettings.OBJECTS.tree.atlas_points
