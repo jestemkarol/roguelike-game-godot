@@ -1,4 +1,5 @@
-extends Node
+@tool
+extends RefCounted
 
 class_name AreaSettings
 

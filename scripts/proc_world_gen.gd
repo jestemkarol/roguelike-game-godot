@@ -32,15 +32,15 @@ var water_rocks_array: Array = []
 
 # Report vars
 var cliff_density_reached: bool = false
-var seed: int
+var used_seed: int
 
 var max_cliff_tiles: int
 
 
 @onready var tile_map: TileMap = $TileMap
 @onready var player: CharacterBody2D = $Player
-@onready var AreaSettings = preload("res://scripts/AreaSettings.gd")
-@onready var Helpers = preload("res://scripts/ScriptHelpers.gd")
+@onready var config: AreaSettings = AreaSettings.new()
+@onready var helpers: Helpers = Helpers.new()
 @onready var report_formatter: ReportFormatter = ReportFormatter.new()
 
 func _ready() -> void:
@@ -55,17 +55,17 @@ func _initialize_noise() -> void:
 	grain_noise = grain_noise_texture.noise
 	cliff_noise = noise_cliff_texture.noise
 	paths_noise = noise_paths_texture.noise
-	seed = randi()
+	used_seed = randi()
 	#seed = 703819954 # cliff seed
-	height_noise.set_seed(seed)
-	grain_noise.set_seed(seed)
-	cliff_noise.set_seed(seed)
-	paths_noise.set_seed(seed)
+	height_noise.set_seed(used_seed)
+	grain_noise.set_seed(used_seed)
+	cliff_noise.set_seed(used_seed)
+	paths_noise.set_seed(used_seed)
 
 
 func _initialize_constants() -> void:
 	max_cliff_tiles = int(
-		float(AreaSettings.WIDTH * AreaSettings.HEIGHT) * AreaSettings.MAX_CLIFF_TILES_DENSITY
+		float(config.WIDTH * config.HEIGHT) * config.MAX_CLIFF_TILES_DENSITY
 	)
 
 
@@ -79,12 +79,11 @@ func generate_level() -> void:
 	_log_report()
 
 
-func _generate_terrain() -> Array:
-	var height_values = []
+func _generate_terrain() -> void:
 	var gradient_image: Image = GRADIENT.get_image()
 
-	for x in range(AreaSettings.WIDTH):
-		for y in range(AreaSettings.HEIGHT):
+	for x in range(config.WIDTH):
+		for y in range(config.HEIGHT):
 			var point = Vector2i(x, y)
 			var height_noise_val = height_noise.get_noise_2d(x * 0.3, y * 0.3) * 2.0
 			var grain_noise_val = grain_noise.get_noise_2d(x, y)
@@ -92,14 +91,12 @@ func _generate_terrain() -> Array:
 			var paths_noise_val = paths_noise.get_noise_2d(x, y)
 			var gradient_val = gradient_image.get_pixel(x, y).r
 			height_noise_val -= gradient_val
-			height_values.append(height_noise_val)
 			_categorize_point(
 				point, height_noise_val, grain_noise_val, cliff_noise_val, paths_noise_val
 			)
 			_set_initial_tile(point)
 
 	_remove_duplicates()
-	return height_values
 
 
 func _categorize_point(
@@ -137,47 +134,47 @@ func _categorize_point(
 
 
 func _remove_duplicates() -> void:
-	grass_array = Helpers.make_unique(grass_array)
-	trees_array = Helpers.make_unique(trees_array)
-	cliffs_array = Helpers.make_unique(cliffs_array)
-	paths_array = Helpers.make_unique(paths_array)
-	water_rocks_array = Helpers.make_unique(water_rocks_array)
-	bushes_array = Helpers.make_unique(bushes_array)
+	grass_array = helpers.make_unique(grass_array)
+	trees_array = helpers.make_unique(trees_array)
+	cliffs_array = helpers.make_unique(cliffs_array)
+	paths_array = helpers.make_unique(paths_array)
+	water_rocks_array = helpers.make_unique(water_rocks_array)
+	bushes_array = helpers.make_unique(bushes_array)
 
 
 func _set_initial_tile(point: Vector2i) -> void:
 	tile_map.set_cell(
-		AreaSettings.LAYERS.water, point, AreaSettings.WATER.source_id, AreaSettings.WATER.atlas
+		config.LAYERS.water, point, config.WATER.source_id, config.WATER.atlas
 	)
 
 
 func _set_tile_terrain() -> void:
 	tile_map.set_cells_terrain_connect(
-		AreaSettings.LAYERS.grass,
+		config.LAYERS.grass,
 		grass_array,
-		AreaSettings.GRASS.terrain_set_id,
-		AreaSettings.GRASS.terrain_id
+		config.GRASS.terrain_set_id,
+		config.GRASS.terrain_id
 	)
 	tile_map.set_cells_terrain_connect(
-		AreaSettings.LAYERS.path,
+		config.LAYERS.path,
 		paths_array,
-		AreaSettings.PATH.terrain_set_id,
-		AreaSettings.PATH.terrain_id
+		config.PATH.terrain_set_id,
+		config.PATH.terrain_id
 	)
 	tile_map.set_cells_terrain_connect(
-		AreaSettings.LAYERS.cliff,
+		config.LAYERS.cliff,
 		cliffs_array,
-		AreaSettings.CLIFFS.terrain_set_id,
-		AreaSettings.CLIFFS.terrain_id
+		config.CLIFFS.terrain_set_id,
+		config.CLIFFS.terrain_id
 	)
 	_generate_foam()
 
 
 func _generate_foam() -> void:
-	var grass_coords_array = tile_map.get_used_cells(AreaSettings.LAYERS.grass)
+	var grass_coords_array = tile_map.get_used_cells(config.LAYERS.grass)
 	for coord in grass_coords_array:
 		tile_map.set_cell(
-			AreaSettings.LAYERS.foam, coord, AreaSettings.FOAM.source_id, AreaSettings.FOAM.atlas
+			config.LAYERS.foam, coord, config.FOAM.source_id, config.FOAM.atlas
 		)
 
 
@@ -190,14 +187,14 @@ func _set_objects() -> void:
 
 func _set_water_rocks() -> void:
 	for water_rock_coords in water_rocks_array:
-		var source_id = AreaSettings.ON_WATER_ROCKS.source_ids[
-			randi() % AreaSettings.ON_WATER_ROCKS.source_ids.size()
+		var source_id = config.ON_WATER_ROCKS.source_ids[
+			randi() % config.ON_WATER_ROCKS.source_ids.size()
 		]
 		tile_map.set_cell(
-			AreaSettings.LAYERS.foam,
+			config.LAYERS.foam,
 			water_rock_coords,
 			source_id,
-			AreaSettings.ON_WATER_ROCKS.atlas
+			config.ON_WATER_ROCKS.atlas
 		)
 
 
@@ -218,21 +215,21 @@ func _set_trees() -> void:
 
 			if should_set_tree:
 				tile_map.set_cell(
-					AreaSettings.LAYERS.objects,
+					config.LAYERS.objects,
 					tree_spawn_coords,
-					AreaSettings.OBJECTS.tree.source_id,
-					AreaSettings.OBJECTS.tree.atlas
+					config.OBJECTS.tree.source_id,
+					config.OBJECTS.tree.atlas
 				)
 
 
 func _set_bushes() -> void:
 	for bush_coords in bushes_array:
 		if !paths_array.has(bush_coords) && !cliffs_array.has(bush_coords):
-			var source_id = AreaSettings.OBJECTS.bush.source_ids[
-				randi() % AreaSettings.OBJECTS.bush.source_ids.size()
+			var source_id = config.OBJECTS.bush.source_ids[
+				randi() % config.OBJECTS.bush.source_ids.size()
 			]
 			tile_map.set_cell(
-				AreaSettings.LAYERS.objects, bush_coords, source_id, AreaSettings.OBJECTS.bush.atlas
+				config.LAYERS.objects, bush_coords, source_id, config.OBJECTS.bush.atlas
 			)
 
 
@@ -240,36 +237,36 @@ func _set_mushrooms() -> void:
 	for mushroom_coords in paths_array:
 		var grain_noise_val = grain_noise.get_noise_2d(mushroom_coords.x, mushroom_coords.y)
 		if grain_noise_val > MUSHROOM_MIN_NOISE && !cliffs_array.has(mushroom_coords):
-			var source_ids = AreaSettings.OBJECTS.mushroom.source_ids
+			var source_ids = config.OBJECTS.mushroom.source_ids
 			var source_id = source_ids[randi() % source_ids.size()]
 			tile_map.set_cell(
-				AreaSettings.LAYERS.objects,
+				config.LAYERS.objects,
 				mushroom_coords,
 				source_id,
-				AreaSettings.OBJECTS.mushroom.atlas
+				config.OBJECTS.mushroom.atlas
 			)
 
 
 func _check_reset_stage() -> void:
-	var map_size = AreaSettings.HEIGHT * AreaSettings.WIDTH
+	var map_size = config.HEIGHT * config.WIDTH
 	var land_density = float(grass_array.size()) / float(map_size) * 100.0
-	if land_density < AreaSettings.LAND_DENSITY_MIN:
+	if land_density < config.LAND_DENSITY_MIN:
 		print("Resetting world-gen, because of non sufficient land density: %s%%" % land_density)
 		_ready()
 
 
 func _extend_terrain() -> void:
-	var outer_border_tiles = AreaSettings.GENERATE_TILES_PER_DIRECTION
-	var width = AreaSettings.WIDTH
-	var height = AreaSettings.HEIGHT
+	var outer_border_tiles = config.GENERATE_TILES_PER_DIRECTION
+	var width = config.WIDTH
+	var height = config.HEIGHT
 	for x in range(-outer_border_tiles, width + outer_border_tiles):
 		for y in range(-outer_border_tiles, height + outer_border_tiles):
 			if x < 0 or x >= width or y < 0 or y >= height:
 				tile_map.set_cell(
-					AreaSettings.LAYERS.water,
+					config.LAYERS.water,
 					Vector2i(x, y),
-					AreaSettings.WATER.source_id,
-					AreaSettings.WATER.atlas
+					config.WATER.source_id,
+					config.WATER.atlas
 				)
 
 
@@ -279,16 +276,16 @@ func _log_report() -> void:
 		grass_array,
 		paths_array,
 		trees_array,
-		AreaSettings.HEIGHT * AreaSettings.WIDTH,
+		config.HEIGHT * config.WIDTH,
 		cliff_density_reached,
-		seed
+		used_seed
 	)
 
 
 func _spawn_player() -> void:
 	grass_array.shuffle()
 	for grass_point in grass_array:
-		var tile_data = tile_map.get_cell_tile_data(AreaSettings.LAYERS.cliff, grass_point)
+		var tile_data = tile_map.get_cell_tile_data(config.LAYERS.cliff, grass_point)
 		if tile_data:
 			print("Tried to spawn at %s, but cliff tile detected." % grass_point)
 		else:
