@@ -1,14 +1,16 @@
 extends Node2D
 
-const GRASS_MIN_NOISE = 0.1
-const WATER_ROCKS_MIN_NOISE = 0.6
-const MUSHROOM_MIN_NOISE = 0.55
-const TREES_MIN_NOISE = 0.5
-const BUSH_MIN_NOISE = 0.45
-const CLIFF_MIN_NOISE = 0.3
-const CLIFF_MAX_NOISE = 0.33
-const PATHS_MIN_NOISE = 0.25
-const PATHS_MAX_NOISE = 0.35
+const NOISE_THRESHOLDS = {
+	WATER_ROCKS_MIN = 0.6,
+	GRASS_MIN = 0.1,
+	PATHS_MIN = 0.25,
+	PATHS_MAX = 0.35,
+	CLIFF_MIN = 0.3,
+	CLIFF_MAX = 0.33,
+	BUSH_MIN = 0.45,
+	TREES_MIN = 0.5,
+	MUSHROOM_MIN = 0.55
+}
 
 const GRADIENT = preload("res://data/gradient.png")
 
@@ -57,7 +59,6 @@ func _initialize_noise() -> void:
 	cliff_noise = noise_cliff_texture.noise
 	paths_noise = noise_paths_texture.noise
 	used_seed = randi()
-	#seed = 703819954 # cliff seed
 	height_noise.set_seed(used_seed)
 	grain_noise.set_seed(used_seed)
 	cliff_noise.set_seed(used_seed)
@@ -71,7 +72,9 @@ func _initialize_constants() -> void:
 
 
 func _verify_seed_adequacy() -> void:
-	while true: # This is freaking scary, I could rethink it
+	# TODO: Decrease GRASS_MIN_NOISE instead of reseeding or:
+	# Adjust all _NOISE values to the spread of highest/lowest noise vals instead of reseeding
+	while true: # This is freaking scary, I will rethink it
 		_initialize_noise()
 		var land_density_temp_array = _calculate_land_density()
 		var map_size = float(config.HEIGHT * config.WIDTH)
@@ -95,7 +98,7 @@ func _calculate_land_density() -> Array:
 			var gradient_val = gradient_image.get_pixel(x, y).r
 			height_noise_val -= gradient_val
 
-			if height_noise_val > GRASS_MIN_NOISE:
+			if height_noise_val > NOISE_THRESHOLDS.GRASS_MIN:
 				land_density_temp_array.append(Vector2i(x, y))
 
 	return land_density_temp_array
@@ -137,28 +140,39 @@ func _categorize_point(
 	paths_noise_val: float
 ) -> void:
 	var is_grass_point = false
-	if height_noise_val > GRASS_MIN_NOISE:
+	if height_noise_val > NOISE_THRESHOLDS.GRASS_MIN:
 		is_grass_point = true
 		grass_array.append(point)
 		if (
-			grain_noise_val > BUSH_MIN_NOISE
-			&& grain_noise_val < TREES_MIN_NOISE
-			&& cliff_noise_val < CLIFF_MIN_NOISE
+			grain_noise_val > NOISE_THRESHOLDS.BUSH_MIN
+			&& grain_noise_val < NOISE_THRESHOLDS.TREES_MIN
+			&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MIN
 		):
 			bushes_array.append(point)
-		if grain_noise_val > TREES_MIN_NOISE && cliff_noise_val < CLIFF_MIN_NOISE:
+		if (
+			grain_noise_val > NOISE_THRESHOLDS.TREES_MIN
+			&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MIN
+		):
 			trees_array.append(point)
-	if cliff_noise_val > CLIFF_MIN_NOISE && cliff_noise_val < CLIFF_MAX_NOISE && is_grass_point:
+	if (
+		cliff_noise_val > NOISE_THRESHOLDS.CLIFF_MIN
+		&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MAX
+		&& is_grass_point
+	):
 		if cliffs_array.size() < max_cliff_tiles:
 			cliffs_array.append(point)
 		else:
 			cliff_density_reached = true
-	if paths_noise_val > PATHS_MIN_NOISE && paths_noise_val < PATHS_MAX_NOISE && is_grass_point:
+	if (
+		paths_noise_val > NOISE_THRESHOLDS.PATHS_MIN
+		&& paths_noise_val < NOISE_THRESHOLDS.PATHS_MAX
+		&& is_grass_point
+	):
 		paths_array.append(point)
 	if (
 		!is_grass_point
-		&& grain_noise_val > WATER_ROCKS_MIN_NOISE
-		&& height_noise_val < GRASS_MIN_NOISE
+		&& grain_noise_val > NOISE_THRESHOLDS.WATER_ROCKS_MIN
+		&& height_noise_val < NOISE_THRESHOLDS.GRASS_MIN
 	):
 		water_rocks_array.append(point)
 
@@ -266,7 +280,7 @@ func _set_bushes() -> void:
 func _set_mushrooms() -> void:
 	for mushroom_coords in paths_array:
 		var grain_noise_val = grain_noise.get_noise_2d(mushroom_coords.x, mushroom_coords.y)
-		if grain_noise_val > MUSHROOM_MIN_NOISE && !cliffs_array.has(mushroom_coords):
+		if grain_noise_val > NOISE_THRESHOLDS.MUSHROOM_MIN && !cliffs_array.has(mushroom_coords):
 			var source_ids = config.OBJECTS.mushroom.source_ids
 			var source_id = source_ids[randi() % source_ids.size()]
 			tile_map.set_cell(
