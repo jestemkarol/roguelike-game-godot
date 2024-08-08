@@ -28,6 +28,11 @@ const WATER = {
 	"atlas": Vector2i(0,0)
 }
 
+const ON_WATER_ROCKS = {
+	"source_ids": [1, 2, 3, 4],
+	"atlas": Vector2i(0, 0)
+}
+
 const FOAM = {
 	"source_id": 0,
 	"atlas": Vector2i(0,0)

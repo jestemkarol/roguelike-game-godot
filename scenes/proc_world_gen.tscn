@@ -13,14 +13,11 @@ width = 125
 height = 75
 noise = SubResource("FastNoiseLite_mofb3")
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_yiv60"]
-frequency = 0.2524
-fractal_type = 2
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_qahqx"]
+frequency = 0.2775
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_oje8i"]
-width = 125
-height = 75
-noise = SubResource("FastNoiseLite_yiv60")
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_cn1y2"]
+noise = SubResource("FastNoiseLite_qahqx")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_v76ie"]
 noise_type = 5
@@ -88,7 +85,7 @@ func collect_coords() -> void:
 y_sort_enabled = true
 script = ExtResource("1_1mskc")
 noise_height_texture = SubResource("NoiseTexture2D_0kud5")
-noise_trees_texture = SubResource("NoiseTexture2D_oje8i")
+grain_noise_texture = SubResource("NoiseTexture2D_cn1y2")
 noise_cliff_texture = SubResource("NoiseTexture2D_ab7ms")
 noise_paths_texture = SubResource("NoiseTexture2D_wnno5")
 
@@ -99,7 +96,7 @@ tile_set = ExtResource("1_p76op")
 format = 2
 layer_0/name = "Water"
 layer_0/z_index = -3
-layer_1/name = "Foam"
+layer_1/name = "onWater"
 layer_1/z_index = -2
 layer_1/tile_data = PackedInt32Array()
 layer_2/name = "Grass"
