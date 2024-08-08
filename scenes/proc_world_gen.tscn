@@ -83,12 +83,10 @@ scale = Vector2(1.18036, 1.16961)
 ignore_rotation = false
 enabled = false
 
-[node name="generators" type="Node" parent="."]
+[node name="world_gen_scripts" type="Node" parent="."]
 
-[node name="shared_scripts" type="Node" parent="."]
-
-[node name="AreaSettings" type="Node" parent="shared_scripts"]
+[node name="AreaSettings" type="Node" parent="world_gen_scripts"]
 script = ExtResource("6_33jtd")
 
-[node name="ScriptHelpers" type="Node" parent="shared_scripts"]
+[node name="ScriptHelpers" type="Node" parent="world_gen_scripts"]
 script = ExtResource("4_4btny")

@@ -11,6 +11,7 @@ extends Node2D
 @onready var player: CharacterBody2D = $Player
 @onready var AreaSettings = preload("res://scripts/AreaSettings.gd")
 @onready var Helpers = preload("res://scripts/ScriptHelpers.gd")
+@onready var report_formatter: ReportFormatter = ReportFormatter.new()
 const GRADIENT = preload("res://data/gradient.png")
 
 var height_noise: Noise
@@ -198,15 +199,15 @@ func _extend_terrain() -> void:
 
 
 func _log_report() -> void:
-	var tiles_no_arr = [cliffs_array.size(), grass_array.size(), paths_array.size(), trees_array.size()]
-	var map_size = AreaSettings.HEIGHT * AreaSettings.WIDTH
-	var land_density = float(grass_array.size()) / float(map_size) * 100.0
-	if cliff_density_reached:
-		print('[WORLD-GEN]: Too many cliffs ffs! No. reached after cutoff: ', cliffs_array.size())
-	print('[WORLD-GEN]: Generated %s cliff tiles, %s grass tiles, %s path tiles, %s trees tiles' % tiles_no_arr)
-	print('[WORLD-GEN]: Map size: ', map_size)
-	print('[WORLD-GEN]: Land density: %s%%' % land_density)
-	print('[WORLD-GEN]: Used seed: ', seed)
+	report_formatter.log_report(
+		cliffs_array,
+		grass_array,
+		paths_array,
+		trees_array,
+		AreaSettings.HEIGHT * AreaSettings.WIDTH,
+		cliff_density_reached,
+		seed
+	)
 
 func _spawn_player() -> void:
 	grass_array.shuffle()
