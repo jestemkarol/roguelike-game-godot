@@ -1,7 +1,7 @@
 @tool
-extends RefCounted
 
 class_name AreaSettings
+extends RefCounted
 
 # Area size
 # REMEMBER if changing to change Noise H&W

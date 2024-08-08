@@ -1,7 +1,7 @@
 @tool
-extends RefCounted
 
 class_name Helpers
+extends RefCounted
 
 func make_unique(array: Array) -> Array:
 	var unique_set = {}

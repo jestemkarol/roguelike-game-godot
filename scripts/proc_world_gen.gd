@@ -46,6 +46,7 @@ var max_cliff_tiles: int
 func _ready() -> void:
 	_initialize_noise()
 	_initialize_constants()
+	_verify_seed_adequacy()
 	generate_level()
 
 
@@ -69,12 +70,41 @@ func _initialize_constants() -> void:
 	)
 
 
+func _verify_seed_adequacy() -> void:
+	while true: # This is freaking scary, I could rethink it
+		_initialize_noise()
+		var land_density_temp_array = _calculate_land_density()
+		var map_size = float(config.HEIGHT * config.WIDTH)
+		var land_density = land_density_temp_array.size() / map_size * 100.0
+
+		if land_density >= config.LAND_DENSITY_MIN:
+			break
+		else:
+			print(
+				"Regenerating with new seed due to insufficient land density of %s%%"
+				% land_density
+			)
+
+func _calculate_land_density() -> Array:
+	var land_density_temp_array: Array = []
+	var gradient_image: Image = GRADIENT.get_image()
+
+	for x in range(config.WIDTH):
+		for y in range(config.HEIGHT):
+			var height_noise_val = height_noise.get_noise_2d(x * 0.3, y * 0.3) * 2.0
+			var gradient_val = gradient_image.get_pixel(x, y).r
+			height_noise_val -= gradient_val
+
+			if height_noise_val > GRASS_MIN_NOISE:
+				land_density_temp_array.append(Vector2i(x, y))
+
+	return land_density_temp_array
+
 func generate_level() -> void:
 	_generate_terrain()
 	_set_tile_terrain()
 	_set_objects()
 	_spawn_player()
-	_check_reset_stage()
 	_extend_terrain()
 	_log_report()
 
@@ -247,14 +277,6 @@ func _set_mushrooms() -> void:
 			)
 
 
-func _check_reset_stage() -> void:
-	var map_size = config.HEIGHT * config.WIDTH
-	var land_density = float(grass_array.size()) / float(map_size) * 100.0
-	if land_density < config.LAND_DENSITY_MIN:
-		print("Resetting world-gen, because of non sufficient land density: %s%%" % land_density)
-		_ready()
-
-
 func _extend_terrain() -> void:
 	var outer_border_tiles = config.GENERATE_TILES_PER_DIRECTION
 	var width = config.WIDTH
@@ -271,16 +293,20 @@ func _extend_terrain() -> void:
 
 
 func _log_report() -> void:
-	report_formatter.log_report(
-		cliffs_array,
-		grass_array,
-		paths_array,
-		trees_array,
-		config.HEIGHT * config.WIDTH,
-		cliff_density_reached,
-		used_seed
-	)
+	report_formatter.log_report(build_log_report_data())
 
+func build_log_report_data() -> Dictionary:
+	var log_report_data: Dictionary = {
+		'cliffs_array': cliffs_array,
+		'grass_array': grass_array,
+		'paths_array': paths_array,
+		'trees_array': trees_array,
+		'water_rocks_array': water_rocks_array,
+		'map_size': config.HEIGHT * config.WIDTH,
+		'cliff_density_reached': cliff_density_reached,
+		'used_seed': used_seed
+	}
+	return log_report_data
 
 func _spawn_player() -> void:
 	grass_array.shuffle()
@@ -293,6 +319,3 @@ func _spawn_player() -> void:
 			print("Player spawned successfully at %s." % grass_point)
 			return
 
-	# If no suitable grass tile is found, restart the setup
-	print("Failed to find a suitable grass tile for player spawn. Restarting setup...")
-	_ready()
