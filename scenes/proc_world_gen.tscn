@@ -1,17 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://balhakiefw0so"]
+[gd_scene load_steps=11 format=3 uid="uid://balhakiefw0so"]
 
 [ext_resource type="Script" path="res://scripts/proc_world_gen.gd" id="1_1mskc"]
 [ext_resource type="TileSet" uid="uid://d02xumhclvqji" path="res://data/tilemap.tres" id="1_p76op"]
+[ext_resource type="Texture2D" uid="uid://8rcnsma7wbwd" path="res://data/noise_height_texture.tres" id="2_irg5n"]
 [ext_resource type="PackedScene" uid="uid://b3xl2512wepbf" path="res://scenes/player.tscn" id="3_8op7g"]
-[ext_resource type="Script" path="res://scripts/ScriptHelpers.gd" id="4_4btny"]
-[ext_resource type="Script" path="res://scripts/AreaSettings.gd" id="6_33jtd"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_mofb3"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_0kud5"]
-width = 125
-height = 75
-noise = SubResource("FastNoiseLite_mofb3")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_qahqx"]
 frequency = 0.2775
@@ -40,7 +32,7 @@ noise = SubResource("FastNoiseLite_vm620")
 [node name="proc_world_gen" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_1mskc")
-noise_height_texture = SubResource("NoiseTexture2D_0kud5")
+noise_height_texture = ExtResource("2_irg5n")
 grain_noise_texture = SubResource("NoiseTexture2D_cn1y2")
 noise_cliff_texture = SubResource("NoiseTexture2D_ab7ms")
 noise_paths_texture = SubResource("NoiseTexture2D_wnno5")
@@ -82,11 +74,3 @@ position = Vector2(22, 27)
 scale = Vector2(1.18036, 1.16961)
 ignore_rotation = false
 enabled = false
-
-[node name="world_gen_scripts" type="Node" parent="."]
-
-[node name="AreaSettings" type="Node" parent="world_gen_scripts"]
-script = ExtResource("6_33jtd")
-
-[node name="ScriptHelpers" type="Node" parent="world_gen_scripts"]
-script = ExtResource("4_4btny")
