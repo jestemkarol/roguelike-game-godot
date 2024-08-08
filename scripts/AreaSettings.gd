@@ -7,21 +7,29 @@ class_name AreaSettings
 const HEIGHT = 50
 const WIDTH = 75
 
-const LAND_DENSITY_MIN = 75.0
+const GENERATE_TILES_PER_DIRECTION = 15
+
+const LAND_DENSITY_MIN = 50.0
 
 const MAX_CLIFF_TILES_DENSITY = 0.1
 
 # Layers
 const LAYERS = {
 	"water": 0,
-	"grass": 1,
-	"path": 2,
-	"cliff": 3,
-	"objects": 4
+	"foam": 1,
+	"grass": 2,
+	"path": 3,
+	"cliff": 4,
+	"objects": 5
 }
 
 const WATER = {
 	"source_id": 11,
+	"atlas": Vector2i(0,0)
+}
+
+const FOAM = {
+	"source_id": 0,
 	"atlas": Vector2i(0,0)
 }
 

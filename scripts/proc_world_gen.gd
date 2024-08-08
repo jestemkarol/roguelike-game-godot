@@ -19,6 +19,7 @@ var trees_array: Array = []
 
 # Report vars
 var cliff_density_reached: bool = false
+var seed: int
 
 var PLAYER_SPAWN_AREA: Dictionary
 var MAX_CLIFF_TILES: int
@@ -32,8 +33,10 @@ func _initialize_noise() -> void:
 	randomize()
 	height_noise = noise_height_texture.noise
 	trees_noise = noise_trees_texture.noise
-	height_noise.set_seed(randi())
-	trees_noise.set_seed(randi())
+	#seed = randi()
+	seed = 312309793
+	height_noise.set_seed(seed)
+	trees_noise.set_seed(seed)
 
 func _initialize_constants() -> void:
 	PLAYER_SPAWN_AREA = {
@@ -48,6 +51,7 @@ func generate_level() -> void:
 	_set_objects()
 	_spawn_player()
 	_check_reset_stage(height_values)
+	_extend_terrain()
 	_log_report()
 
 func _generate_terrain() -> Array:
@@ -94,8 +98,14 @@ func _set_initial_tile(point: Vector2i, height_noise_val: float) -> void:
 
 func _set_tile_terrain() -> void:
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.grass, grass_array, AreaSettings.GRASS.terrain_set_id, AreaSettings.GRASS.terrain_id)
-	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
+	tile_map.set_cells_terrain_path(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliffs_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
+	_generate_foam()
+
+func _generate_foam() -> void:
+	var grass_coords_array = tile_map.get_used_cells(AreaSettings.LAYERS.grass)
+	for coord in grass_coords_array:
+		tile_map.set_cell(AreaSettings.LAYERS.foam, coord, AreaSettings.FOAM.source_id, AreaSettings.FOAM.atlas)
 
 func _set_objects() -> void:
 	var trees_array_copy = trees_array.duplicate()
@@ -128,6 +138,15 @@ func _check_reset_stage(height_values: Array) -> void:
 		print('Resetting world-gen, because of non sufficient land density: %s%%' % land_density)
 		_ready()
 
+func _extend_terrain() -> void:
+	var outer_border_tiles = AreaSettings.GENERATE_TILES_PER_DIRECTION
+	var width = AreaSettings.WIDTH
+	var height = AreaSettings.HEIGHT
+	for x in range(-outer_border_tiles, width + outer_border_tiles):
+		for y in range(-outer_border_tiles, height + outer_border_tiles):
+			if (x < 0 or x >= width or y < 0 or y >= height):
+				tile_map.set_cell(AreaSettings.LAYERS.water, Vector2i(x, y), AreaSettings.WATER.source_id, AreaSettings.WATER.atlas)
+
 
 func _log_report() -> void:
 	var tiles_no_arr = [cliffs_array.size(), grass_array.size(), paths_array.size(), trees_array.size()]
@@ -138,6 +157,7 @@ func _log_report() -> void:
 	print('[WORLD-GEN]: Generated %s cliff tiles, %s grass tiles, %s path tiles, %s trees tiles' % tiles_no_arr)
 	print('[WORLD-GEN]: Map size: ', map_size)
 	print('[WORLD-GEN]: Land density: %s%%' % land_density)
+	print('[WORLD-GEN]: Used seed: ', seed)
 
 func _spawn_player() -> void:
 	grass_array.shuffle()
