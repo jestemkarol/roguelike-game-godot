@@ -115,18 +115,12 @@ func _categorize_point(point: Vector2i, height_noise_val: float, grain_noise_val
 		water_rocks_array.append(point)
 
 func _remove_duplicates() -> void:
-	grass_array = _make_unique(grass_array)
-	trees_array = _make_unique(trees_array)
-	cliffs_array = _make_unique(cliffs_array)
-	paths_array = _make_unique(paths_array)
-	water_rocks_array = _make_unique(water_rocks_array)
-	bushes_array = _make_unique(bushes_array)
-
-func _make_unique(array: Array) -> Array:
-	var unique_set = {}
-	for element in array:
-		unique_set[element] = true
-	return unique_set.keys()
+	grass_array = Helpers.make_unique(grass_array)
+	trees_array = Helpers.make_unique(trees_array)
+	cliffs_array = Helpers.make_unique(cliffs_array)
+	paths_array = Helpers.make_unique(paths_array)
+	water_rocks_array = Helpers.make_unique(water_rocks_array)
+	bushes_array = Helpers.make_unique(bushes_array)
 
 func _set_initial_tile(point: Vector2i, height_noise_val: float) -> void:
 	tile_map.set_cell(AreaSettings.LAYERS.water, point, AreaSettings.WATER.source_id, AreaSettings.WATER.atlas)
