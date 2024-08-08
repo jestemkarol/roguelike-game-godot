@@ -22,10 +22,13 @@ var paths_array: Array = []
 var cliffs_array: Array = []
 var trees_array: Array = []
 var water_rocks_array: Array = []
+var bushes_array: Array = []
 
 const GRASS_MIN_NOISE = 0.1
-const WATER_ROCKS_MIN_NOISE = 0.5
-const TREES_MIN_NOISE = 0.7
+const WATER_ROCKS_MIN_NOISE = 0.6
+const MUSHROOM_MIN_NOISE = 0.55
+const TREES_MIN_NOISE = 0.5
+const BUSH_MIN_NOISE = 0.45
 const CLIFF_MIN_NOISE = 0.3
 const CLIFF_MAX_NOISE = 0.33
 const PATHS_MIN_NOISE = 0.25
@@ -49,8 +52,8 @@ func _initialize_noise() -> void:
 	grain_noise = grain_noise_texture.noise
 	cliff_noise = noise_cliff_texture.noise
 	paths_noise = noise_paths_texture.noise
-	#seed = randi()
-	seed = 703819954 # cliff seed
+	seed = randi()
+	#seed = 703819954 # cliff seed
 	height_noise.set_seed(seed)
 	grain_noise.set_seed(seed)
 	cliff_noise.set_seed(seed)
@@ -97,6 +100,8 @@ func _categorize_point(point: Vector2i, height_noise_val: float, grain_noise_val
 	if height_noise_val > GRASS_MIN_NOISE:
 		is_grass_point = true
 		grass_array.append(point)
+		if grain_noise_val > BUSH_MIN_NOISE && grain_noise_val < TREES_MIN_NOISE && cliff_noise_val < CLIFF_MIN_NOISE:
+			bushes_array.append(point)
 		if grain_noise_val > TREES_MIN_NOISE && cliff_noise_val < CLIFF_MIN_NOISE:
 			trees_array.append(point)
 	if cliff_noise_val > CLIFF_MIN_NOISE && cliff_noise_val < CLIFF_MAX_NOISE && is_grass_point:
@@ -114,6 +119,8 @@ func _remove_duplicates() -> void:
 	trees_array = _make_unique(trees_array)
 	cliffs_array = _make_unique(cliffs_array)
 	paths_array = _make_unique(paths_array)
+	water_rocks_array = _make_unique(water_rocks_array)
+	bushes_array = _make_unique(bushes_array)
 
 func _make_unique(array: Array) -> Array:
 	var unique_set = {}
@@ -136,9 +143,17 @@ func _generate_foam() -> void:
 		tile_map.set_cell(AreaSettings.LAYERS.foam, coord, AreaSettings.FOAM.source_id, AreaSettings.FOAM.atlas)
 
 func _set_objects() -> void:
+	_set_water_rocks()
+	_set_trees()
+	_set_bushes()
+	_set_mushrooms()
+
+func _set_water_rocks() -> void:
 	for water_rock_coords in water_rocks_array:
 		var source_id = AreaSettings.ON_WATER_ROCKS.source_ids[randi() % AreaSettings.ON_WATER_ROCKS.source_ids.size()]
 		tile_map.set_cell(AreaSettings.LAYERS.foam, water_rock_coords, source_id, AreaSettings.ON_WATER_ROCKS.atlas)
+
+func _set_trees() -> void:
 	var trees_array_copy = trees_array.duplicate()
 	while !trees_array_copy.is_empty():
 		var tree_spawn_coords = trees_array_copy.pop_back()
@@ -154,17 +169,26 @@ func _set_objects() -> void:
 					break
 
 			if should_set_tree:
-				_set_tree(tree_spawn_coords)
+				tile_map.set_cell(AreaSettings.LAYERS.objects, tree_spawn_coords, AreaSettings.OBJECTS.tree.source_id, AreaSettings.OBJECTS.tree.atlas)
 
-func _set_tree(point: Vector2i) -> void:
-	tile_map.set_cell(AreaSettings.LAYERS.objects, point, AreaSettings.OBJECTS.tree.source_id, AreaSettings.OBJECTS.tree.atlas)
+func _set_bushes() -> void:
+	for bush_coords in bushes_array:
+		if !paths_array.has(bush_coords) && !cliffs_array.has(bush_coords):
+			var source_id = AreaSettings.OBJECTS.bush.source_ids[randi() % AreaSettings.OBJECTS.bush.source_ids.size()]
+			tile_map.set_cell(AreaSettings.LAYERS.objects, bush_coords, source_id, AreaSettings.OBJECTS.bush.atlas)
+
+func _set_mushrooms() -> void:
+	for mushroom_coords in paths_array:
+		var grain_noise_val = grain_noise.get_noise_2d(mushroom_coords.x, mushroom_coords.y)
+		if grain_noise_val > MUSHROOM_MIN_NOISE && !cliffs_array.has(mushroom_coords):
+			var source_ids = AreaSettings.OBJECTS.mushroom.source_ids
+			var source_id = source_ids[randi() % source_ids.size()]
+			tile_map.set_cell(AreaSettings.LAYERS.objects, mushroom_coords, source_id, AreaSettings.OBJECTS.mushroom.atlas)
+		
 
 func _check_reset_stage(height_values: Array) -> void:
 	var map_size = AreaSettings.HEIGHT * AreaSettings.WIDTH
 	var land_density = float(grass_array.size()) / float(map_size) * 100.0
-	if height_values.max() < 0.4 || height_values.min() > -0.2:
-		print('Resetting world-gen, because of noise low: %s and high %s' % [height_values.min(), height_values.max()])
-		#_ready()
 	if land_density < AreaSettings.LAND_DENSITY_MIN:
 		print('Resetting world-gen, because of non sufficient land density: %s%%' % land_density)
 		_ready()

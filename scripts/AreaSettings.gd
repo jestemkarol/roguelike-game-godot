@@ -60,5 +60,13 @@ const OBJECTS = {
 	"tree": {
 		"source_id": 10,
 		"atlas": Vector2i(0,0)
+	},
+	"mushroom": {
+		"source_ids": [5, 6, 7],
+		"atlas": Vector2i(0,0)
+	},
+	"bush": {
+		"source_ids": [12, 13, 14],
+		"atlas": Vector2i(0,0)
 	}
 }
