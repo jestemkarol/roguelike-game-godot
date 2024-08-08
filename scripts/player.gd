@@ -14,18 +14,18 @@ const EnemyGroupName: String = 'enemy'
 const Directions: Dictionary = {DOWN = 'down', UP = 'up', RIGHT = 'right', LEFT = 'left'}
 
 # animation names
-const IdleAnimationNames: Dictionary = { 
-	DOWN = 'idle_down', SIDE = 'idle_side', UP = 'idle_up' 
+const IdleAnimationNames: Dictionary = {
+	DOWN = 'idle_down', SIDE = 'idle_side', UP = 'idle_up'
 }
-const AttackAnimationNames: Dictionary = { 
-	DOWN = 'attack_down', SIDE = 'attack_side', UP = 'attack_up' 
+const AttackAnimationNames: Dictionary = {
+	DOWN = 'attack_down', SIDE = 'attack_side', UP = 'attack_up'
 }
-const MoveAnimationNames: Dictionary = { 
-	DOWN = 'move_down', SIDE = 'move_side', UP = 'move_up' 
+const MoveAnimationNames: Dictionary = {
+	DOWN = 'move_down', SIDE = 'move_side', UP = 'move_up'
 }
 const AnimationNames: Dictionary = {
-	IDLE = IdleAnimationNames, 
-	ATTACK = AttackAnimationNames, 
+	IDLE = IdleAnimationNames,
+	ATTACK = AttackAnimationNames,
 	MOVE = MoveAnimationNames
 }
 
@@ -52,7 +52,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	player_movement(delta)
-	
+
 func player_movement(delta: float) -> void:
 	if in_knockback_state:
 		apply_knockback(delta)
@@ -131,7 +131,7 @@ func hit(damage: int):
 		just_hit = true
 		just_hit_timer.start()
 		health -= damage
-		
+
 		print("Player health: %s" % health)
 		if health < 0:
 			death()

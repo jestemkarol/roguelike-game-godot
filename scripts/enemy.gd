@@ -10,18 +10,18 @@ extends CharacterBody2D
 
 const PlayerGroupName: String = 'player'
 
-const IdleAnimationNames: Dictionary = { 
-	DOWN = 'idle_down', SIDE = 'idle_side', UP = 'idle_up' 
+const IdleAnimationNames: Dictionary = {
+	DOWN = 'idle_down', SIDE = 'idle_side', UP = 'idle_up'
 }
-const AttackAnimationNames: Dictionary = { 
-	DOWN = 'attack_down', SIDE = 'attack_side', UP = 'attack_up' 
+const AttackAnimationNames: Dictionary = {
+	DOWN = 'attack_down', SIDE = 'attack_side', UP = 'attack_up'
 }
-const MoveAnimationNames: Dictionary = { 
-	DOWN = 'move_down', SIDE = 'move_side', UP = 'move_up' 
+const MoveAnimationNames: Dictionary = {
+	DOWN = 'move_down', SIDE = 'move_side', UP = 'move_up'
 }
 const AnimationNames: Dictionary = {
-	IDLE = IdleAnimationNames, 
-	ATTACK = AttackAnimationNames, 
+	IDLE = IdleAnimationNames,
+	ATTACK = AttackAnimationNames,
 	MOVE = MoveAnimationNames,
 	DEATH = 'death'
 }
@@ -125,7 +125,7 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 	if body.is_in_group(PlayerGroupName):
 		player = null
 		player_chase = false
-		
+
 func _on_just_hit_timer_timeout() -> void:
 	just_hit = false
 
