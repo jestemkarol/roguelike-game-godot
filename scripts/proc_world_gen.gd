@@ -3,6 +3,8 @@ extends Node2D
 # Exported variables for textures
 @export var noise_height_texture: NoiseTexture2D
 @export var noise_trees_texture: NoiseTexture2D
+@export var noise_cliff_texture: NoiseTexture2D
+@export var noise_paths_texture: NoiseTexture2D
 
 # Onready variables for nodes and resources
 @onready var tile_map: TileMap = $TileMap
@@ -13,10 +15,19 @@ const GRADIENT = preload("res://data/gradient.png")
 
 var height_noise: Noise
 var trees_noise: Noise
+var cliff_noise: Noise
+var paths_noise: Noise
 var grass_array: Array = []
 var paths_array: Array = []
 var cliffs_array: Array = []
 var trees_array: Array = []
+
+const GRASS_MIN_NOISE = 0.1
+const TREES_MIN_NOISE = 0.7
+const CLIFF_MIN_NOISE = 0.3
+const CLIFF_MAX_NOISE = 0.33
+const PATHS_MIN_NOISE = 0.25
+const PATHS_MAX_NOISE = 0.35
 
 # Report vars
 var cliff_density_reached: bool = false
@@ -34,10 +45,14 @@ func _initialize_noise() -> void:
 	randomize()
 	height_noise = noise_height_texture.noise
 	trees_noise = noise_trees_texture.noise
-	seed = randi()
-	#seed = 312309793
+	cliff_noise = noise_cliff_texture.noise
+	paths_noise = noise_paths_texture.noise
+	#seed = randi()
+	seed = 703819954 # cliff seed
 	height_noise.set_seed(seed)
 	trees_noise.set_seed(seed)
+	cliff_noise.set_seed(seed)
+	paths_noise.set_seed(seed)
 
 func _initialize_constants() -> void:
 	PLAYER_SPAWN_AREA = {
@@ -64,26 +79,30 @@ func _generate_terrain() -> Array:
 			var point = Vector2i(x, y)
 			var height_noise_val = height_noise.get_noise_2d(x * 0.3, y * 0.3) * 2.0
 			var trees_noise_val = trees_noise.get_noise_2d(x, y)
+			var cliff_noise_val = cliff_noise.get_noise_2d(x, y)
+			var paths_noise_val = paths_noise.get_noise_2d(x, y)
 			var gradient_val = gradient_image.get_pixel(x, y).r
 			height_noise_val -= gradient_val
 			height_values.append(height_noise_val)
-			_categorize_point(point, height_noise_val, trees_noise_val)
+			_categorize_point(point, height_noise_val, trees_noise_val, cliff_noise_val, paths_noise_val)
 			_set_initial_tile(point, height_noise_val)
 
 	_remove_duplicates()
 	return height_values
 
-func _categorize_point(point: Vector2i, height_noise_val: float, trees_noise_val: float) -> void:
-	if height_noise_val > 0.1:
+func _categorize_point(point: Vector2i, height_noise_val: float, trees_noise_val: float, cliff_noise_val: float, paths_noise_val: float) -> void:
+	var is_grass_point = false
+	if height_noise_val > GRASS_MIN_NOISE:
+		is_grass_point = true
 		grass_array.append(point)
-		if trees_noise_val > 0.75 && height_noise_val < 0.35:
+		if trees_noise_val > TREES_MIN_NOISE && cliff_noise_val < CLIFF_MIN_NOISE:
 			trees_array.append(point)
-	if height_noise_val > 0.5 && height_noise_val < 0.55:
+	if cliff_noise_val > CLIFF_MIN_NOISE && cliff_noise_val < CLIFF_MAX_NOISE && is_grass_point:
 		if cliffs_array.size() < MAX_CLIFF_TILES:
 			cliffs_array.append(point)
 		else:
 			cliff_density_reached = true
-	if height_noise_val > 0.15 && height_noise_val < 0.18:
+	if paths_noise_val > PATHS_MIN_NOISE && paths_noise_val < PATHS_MAX_NOISE && is_grass_point:
 		paths_array.append(point)
 
 func _remove_duplicates() -> void:
