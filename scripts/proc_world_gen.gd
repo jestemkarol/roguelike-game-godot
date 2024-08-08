@@ -9,6 +9,7 @@ extends Node2D
 @onready var player: CharacterBody2D = $Player
 @onready var AreaSettings = preload("res://scripts/AreaSettings.gd")
 @onready var Helpers = preload("res://scripts/ScriptHelpers.gd")
+const GRADIENT = preload("res://data/gradient.png")
 
 var height_noise: Noise
 var trees_noise: Noise
@@ -33,8 +34,8 @@ func _initialize_noise() -> void:
 	randomize()
 	height_noise = noise_height_texture.noise
 	trees_noise = noise_trees_texture.noise
-	#seed = randi()
-	seed = 312309793
+	seed = randi()
+	#seed = 312309793
 	height_noise.set_seed(seed)
 	trees_noise.set_seed(seed)
 
@@ -56,29 +57,33 @@ func generate_level() -> void:
 
 func _generate_terrain() -> Array:
 	var height_values = []
+	var gradient_image: Image = GRADIENT.get_image()
+
 	for x in range(AreaSettings.WIDTH):
 		for y in range(AreaSettings.HEIGHT):
 			var point = Vector2i(x, y)
-			var height_noise_val = height_noise.get_noise_2d(x, y)
+			var height_noise_val = height_noise.get_noise_2d(x * 0.3, y * 0.3) * 2.0
 			var trees_noise_val = trees_noise.get_noise_2d(x, y)
-
+			var gradient_val = gradient_image.get_pixel(x, y).r
+			height_noise_val -= gradient_val
 			height_values.append(height_noise_val)
 			_categorize_point(point, height_noise_val, trees_noise_val)
 			_set_initial_tile(point, height_noise_val)
+
 	_remove_duplicates()
 	return height_values
 
 func _categorize_point(point: Vector2i, height_noise_val: float, trees_noise_val: float) -> void:
-	if height_noise_val > -0.15:
+	if height_noise_val > 0.1:
 		grass_array.append(point)
-		if trees_noise_val > 0.75 && height_noise_val < 0.15:
+		if trees_noise_val > 0.75 && height_noise_val < 0.35:
 			trees_array.append(point)
-	if height_noise_val > 0.35:
+	if height_noise_val > 0.5 && height_noise_val < 0.55:
 		if cliffs_array.size() < MAX_CLIFF_TILES:
 			cliffs_array.append(point)
 		else:
 			cliff_density_reached = true
-	if height_noise_val > 0.0 && height_noise_val < 0.05:
+	if height_noise_val > 0.15 && height_noise_val < 0.18:
 		paths_array.append(point)
 
 func _remove_duplicates() -> void:
@@ -98,7 +103,7 @@ func _set_initial_tile(point: Vector2i, height_noise_val: float) -> void:
 
 func _set_tile_terrain() -> void:
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.grass, grass_array, AreaSettings.GRASS.terrain_set_id, AreaSettings.GRASS.terrain_id)
-	tile_map.set_cells_terrain_path(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
+	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.path, paths_array, AreaSettings.PATH.terrain_set_id, AreaSettings.PATH.terrain_id)
 	tile_map.set_cells_terrain_connect(AreaSettings.LAYERS.cliff, cliffs_array, AreaSettings.CLIFFS.terrain_set_id, AreaSettings.CLIFFS.terrain_id)
 	_generate_foam()
 
@@ -131,9 +136,9 @@ func _set_tree(point: Vector2i) -> void:
 func _check_reset_stage(height_values: Array) -> void:
 	var map_size = AreaSettings.HEIGHT * AreaSettings.WIDTH
 	var land_density = float(grass_array.size()) / float(map_size) * 100.0
-	if height_values.max() < 0.4 || height_values.max() > 0.5 || height_values.min() > -0.2:
+	if height_values.max() < 0.4 || height_values.min() > -0.2:
 		print('Resetting world-gen, because of noise low: %s and high %s' % [height_values.min(), height_values.max()])
-		_ready()
+		#_ready()
 	if land_density < AreaSettings.LAND_DENSITY_MIN:
 		print('Resetting world-gen, because of non sufficient land density: %s%%' % land_density)
 		_ready()

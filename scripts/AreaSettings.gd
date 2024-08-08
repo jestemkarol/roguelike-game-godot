@@ -4,12 +4,12 @@ class_name AreaSettings
 
 # Area size
 # REMEMBER if changing to change Noise H&W
-const HEIGHT = 50
-const WIDTH = 75
+const HEIGHT = 75
+const WIDTH = 125
 
 const GENERATE_TILES_PER_DIRECTION = 15
 
-const LAND_DENSITY_MIN = 50.0
+const LAND_DENSITY_MIN = 35.0
 
 const MAX_CLIFF_TILES_DENSITY = 0.1
 

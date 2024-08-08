@@ -6,22 +6,20 @@
 [ext_resource type="Script" path="res://scripts/ScriptHelpers.gd" id="4_4btny"]
 [ext_resource type="Script" path="res://scripts/AreaSettings.gd" id="6_33jtd"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_v0f4q"]
-noise_type = 3
-fractal_type = 0
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_mofb3"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_0kud5"]
-width = 75
-height = 50
-noise = SubResource("FastNoiseLite_v0f4q")
+width = 125
+height = 75
+noise = SubResource("FastNoiseLite_mofb3")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_yiv60"]
 frequency = 0.2524
 fractal_type = 2
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_oje8i"]
-width = 75
-height = 60
+width = 125
+height = 75
 noise = SubResource("FastNoiseLite_yiv60")
 
 [sub_resource type="GDScript" id="GDScript_hi6b0"]
@@ -103,14 +101,14 @@ z_index = 1
 y_sort_enabled = true
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
-position = Vector2(0, -5)
+position = Vector2(1, -28)
 ignore_rotation = false
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(1130, 626)
+position = Vector2(22, 27)
+scale = Vector2(1.18036, 1.16961)
 ignore_rotation = false
 enabled = false
-zoom = Vector2(0.5, 0.5)
 
 [node name="generators" type="Node" parent="."]
 
