@@ -143,39 +143,43 @@ func _categorize_point(
 	if height_noise_val > NOISE_THRESHOLDS.GRASS_MIN:
 		is_grass_point = true
 		grass_array.append(point)
-		if (
-			grain_noise_val > NOISE_THRESHOLDS.BUSH_MIN
-			&& grain_noise_val < NOISE_THRESHOLDS.TREES_MIN
-			&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MIN
-		):
+		if _can_set_bush(grain_noise_val, cliff_noise_val):
 			bushes_array.append(point)
-		if (
-			grain_noise_val > NOISE_THRESHOLDS.TREES_MIN
-			&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MIN
-		):
+		if _can_set_tree(grain_noise_val, cliff_noise_val):
 			trees_array.append(point)
-	if (
-		cliff_noise_val > NOISE_THRESHOLDS.CLIFF_MIN
-		&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MAX
-		&& is_grass_point
-	):
+	if _can_set_cliff(cliff_noise_val, is_grass_point):
 		if cliffs_array.size() < max_cliff_tiles:
 			cliffs_array.append(point)
 		else:
 			cliff_density_reached = true
-	if (
-		paths_noise_val > NOISE_THRESHOLDS.PATHS_MIN
-		&& paths_noise_val < NOISE_THRESHOLDS.PATHS_MAX
-		&& is_grass_point
-	):
+	if _can_set_path(paths_noise_val, is_grass_point):
 		paths_array.append(point)
-	if (
-		!is_grass_point
-		&& grain_noise_val > NOISE_THRESHOLDS.WATER_ROCKS_MIN
-		&& height_noise_val < NOISE_THRESHOLDS.GRASS_MIN
-	):
+	if _can_set_water_rock(grain_noise_val, height_noise_val, is_grass_point):
 		water_rocks_array.append(point)
 
+func _can_set_bush(grain_noise_val: float, cliff_noise_val: float) -> bool:
+	return (grain_noise_val > NOISE_THRESHOLDS.BUSH_MIN
+		&& grain_noise_val < NOISE_THRESHOLDS.TREES_MIN
+		&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MIN)
+
+func _can_set_tree(grain_noise_val: float, cliff_noise_val: float) -> bool:
+	return (grain_noise_val > NOISE_THRESHOLDS.TREES_MIN
+		&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MIN)
+
+func _can_set_cliff(cliff_noise_val: float, is_grass_point: bool) -> bool:
+	return (cliff_noise_val > NOISE_THRESHOLDS.CLIFF_MIN
+		&& cliff_noise_val < NOISE_THRESHOLDS.CLIFF_MAX
+		&& is_grass_point)
+
+func _can_set_path(paths_noise_val: float, is_grass_point: bool) -> bool:
+	return (paths_noise_val > NOISE_THRESHOLDS.PATHS_MIN
+		&& paths_noise_val < NOISE_THRESHOLDS.PATHS_MAX
+		&& is_grass_point)
+
+func _can_set_water_rock(grain_noise_val: float, height_noise_val: float, is_grass_point: bool) -> bool:
+	return (!is_grass_point
+		&& grain_noise_val > NOISE_THRESHOLDS.WATER_ROCKS_MIN
+		&& height_noise_val < NOISE_THRESHOLDS.GRASS_MIN)
 
 func _remove_duplicates() -> void:
 	grass_array = helpers.make_unique(grass_array)
