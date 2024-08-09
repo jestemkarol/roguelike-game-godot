@@ -2,37 +2,32 @@
 
 [ext_resource type="Script" path="res://scripts/proc_world_gen.gd" id="1_1mskc"]
 [ext_resource type="TileSet" uid="uid://d02xumhclvqji" path="res://data/tilemap.tres" id="1_p76op"]
-[ext_resource type="Texture2D" uid="uid://8rcnsma7wbwd" path="res://data/noise_height_texture.tres" id="2_irg5n"]
+[ext_resource type="Texture2D" uid="uid://8rcnsma7wbwd" path="res://data/noise_textures/noise_height_texture.tres" id="2_nmqab"]
 [ext_resource type="PackedScene" uid="uid://b3xl2512wepbf" path="res://scenes/player.tscn" id="3_8op7g"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_qahqx"]
-frequency = 0.2775
+[ext_resource type="FastNoiseLite" uid="uid://dnkfjryyob65o" path="res://data/noise_textures/noises/grain_noise.tres" id="3_j73pt"]
+[ext_resource type="FastNoiseLite" uid="uid://cj1anp6pd86lq" path="res://data/noise_textures/noises/cliff_noise.tres" id="4_h5y71"]
+[ext_resource type="FastNoiseLite" uid="uid://d0017461y0n8p" path="res://data/noise_textures/noises/paths_noise.tres" id="5_5n7er"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_cn1y2"]
-noise = SubResource("FastNoiseLite_qahqx")
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_v76ie"]
-noise_type = 5
-frequency = 0.0161
+width = 125
+height = 75
+noise = ExtResource("3_j73pt")
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ab7ms"]
 width = 125
 height = 75
-noise = SubResource("FastNoiseLite_v76ie")
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_vm620"]
-fractal_type = 2
+noise = ExtResource("4_h5y71")
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_wnno5"]
 width = 125
 height = 75
 invert = true
-noise = SubResource("FastNoiseLite_vm620")
+noise = ExtResource("5_5n7er")
 
 [node name="proc_world_gen" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_1mskc")
-noise_height_texture = ExtResource("2_irg5n")
+noise_height_texture = ExtResource("2_nmqab")
 grain_noise_texture = SubResource("NoiseTexture2D_cn1y2")
 noise_cliff_texture = SubResource("NoiseTexture2D_ab7ms")
 noise_paths_texture = SubResource("NoiseTexture2D_wnno5")

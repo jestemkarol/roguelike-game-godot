@@ -1,0 +1,5 @@
+[gd_resource type="FastNoiseLite" format=3 uid="uid://cj1anp6pd86lq"]
+
+[resource]
+noise_type = 5
+frequency = 0.0161

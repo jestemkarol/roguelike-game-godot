@@ -1,7 +1,7 @@
 extends Node2D
 
 const NOISE_THRESHOLDS = {
-	WATER_ROCKS_MIN = 0.6,
+	WATER_ROCKS_MIN = 0.55,
 	GRASS_MIN = 0.1,
 	PATHS_MIN = 0.25,
 	PATHS_MAX = 0.35,
