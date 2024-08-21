@@ -5,8 +5,8 @@ extends CharacterBody2D
 @onready var deal_attack_timer: Timer = $deal_attack_timer
 @onready var player_hitbox: Area2D = $player_hitbox
 
-@export var speed = 200
-@export var acceleration = 300
+@export var speed = 100
+@export var acceleration = 4
 @export var health = 100
 @export var hit_damage = 20
 
@@ -64,7 +64,7 @@ func player_movement(delta: float) -> void:
 func apply_knockback(delta):
 	if knockback_direction.length() > 0.01:  # Small threshold to stop knockback
 		knockback_direction = lerp(knockback_direction, Vector2.ZERO, knockback_weight)
-		velocity = knockback_direction * knockback_force * acceleration * delta
+		velocity = knockback_direction * knockback_force * acceleration
 	else:
 		in_knockback_state = false
 		knockback_direction = Vector2.ZERO
@@ -109,7 +109,7 @@ func calculate_movement(delta) -> Vector2:
 		play_movement_animation()
 	else:
 		play_animation(AnimationNames.IDLE)
-	return input_direction * speed * acceleration * delta
+	return input_direction * speed * acceleration
 
 func switch_hitbox_shape(direction):
 	for shape in player_hitbox.get_children():
