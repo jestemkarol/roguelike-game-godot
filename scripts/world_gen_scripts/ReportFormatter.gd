@@ -11,6 +11,7 @@ const tiles_no_msg = """
 %s path tiles,
 %s trees tiles,
 %s water rocks
+%s enemies
 """
 const map_size_msg = '[WORLD-GEN]: Map size: '
 const land_density_msg = '[WORLD-GEN]: Land density: %s%%'
@@ -22,7 +23,8 @@ func log_report(report_data: Dictionary) -> void:
 		report_data.grass_array.size(),
 		report_data.paths_array.size(),
 		report_data.trees_array.size(),
-		report_data.water_rocks_array.size()
+		report_data.water_rocks_array.size(),
+		min(report_data.enemies_array.size(), report_data.enemies_count)
 	]
 	var land_density = float(report_data.grass_array.size()) / float(report_data.map_size) * 100.0
 	if report_data.cliff_density_reached:

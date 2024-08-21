@@ -9,11 +9,14 @@ const NOISE_THRESHOLDS = {
 	CLIFF_MAX = 0.33,
 	BUSH_MIN = 0.45,
 	TREES_MIN = 0.5,
-	MUSHROOM_MIN = 0.55
+	MUSHROOM_MIN = 0.55,
+	ENEMY_MIN = 0.2
 }
 
 const GRADIENT = preload("res://data/gradient.png")
 
+@export var Enemy = preload("res://scenes/enemy.tscn")
+@export var enemies_count: int = 5
 
 @export var noise_height_texture: NoiseTexture2D
 @export var grain_noise_texture: NoiseTexture2D
@@ -31,6 +34,7 @@ var paths_array: Array = []
 var cliffs_array: Array = []
 var trees_array: Array = []
 var water_rocks_array: Array = []
+var enemies_array: Array = []
 
 # Report vars
 var cliff_density_reached: bool = false
@@ -107,6 +111,7 @@ func generate_level() -> void:
 	_generate_terrain()
 	_set_tile_terrain()
 	_set_objects()
+	_spawn_enemies()
 	_spawn_player()
 	_extend_terrain()
 	_log_report()
@@ -156,6 +161,8 @@ func _categorize_point(
 		paths_array.append(point)
 	if _can_set_water_rock(grain_noise_val, height_noise_val, is_grass_point):
 		water_rocks_array.append(point)
+	if _can_spawn_enemy(grain_noise_val, is_grass_point):
+		enemies_array.append(point)
 
 func _can_set_bush(grain_noise_val: float, cliff_noise_val: float) -> bool:
 	return (grain_noise_val > NOISE_THRESHOLDS.BUSH_MIN
@@ -180,6 +187,10 @@ func _can_set_water_rock(grain_noise_val: float, height_noise_val: float, is_gra
 	return (!is_grass_point
 		&& grain_noise_val > NOISE_THRESHOLDS.WATER_ROCKS_MIN
 		&& height_noise_val < NOISE_THRESHOLDS.GRASS_MIN)
+
+func _can_spawn_enemy(grain_noise_val: float, is_grass_point: bool) -> bool:
+	return (is_grass_point
+		&& grain_noise_val > NOISE_THRESHOLDS.ENEMY_MIN)
 
 func _remove_duplicates() -> void:
 	grass_array = helpers.make_unique(grass_array)
@@ -322,9 +333,23 @@ func build_log_report_data() -> Dictionary:
 		'water_rocks_array': water_rocks_array,
 		'map_size': config.HEIGHT * config.WIDTH,
 		'cliff_density_reached': cliff_density_reached,
-		'used_seed': used_seed
+		'used_seed': used_seed,
+		'enemies_array': enemies_array,
+		'enemies_count': enemies_count
 	}
 	return log_report_data
+	
+func _spawn_enemies() -> void:
+	var enemy_possible_positions = enemies_array
+	var enemies = enemies_count
+	while enemies > 0:
+		enemy_possible_positions.shuffle()
+		var enemy = Enemy.instantiate()
+		add_child(enemy)
+		enemy.global_position = tile_map.map_to_local(
+			enemy_possible_positions.pop_back()
+		)
+		enemies -= 1
 
 func _spawn_player() -> void:
 	grass_array.shuffle()

@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+class_name Enemy
+
 @onready var just_hit_timer: Timer = $just_hit_timer
 @onready var animation_player: AnimatedSprite2D = $AnimatedSprite2D
 @onready var attack_cooldown_timer: Timer = $attack_cooldown_timer
@@ -51,7 +53,9 @@ func _physics_process(delta: float) -> void:
 	if dead:
 		return
 	elif in_knockback_state:
-		velocity = apply_knockback(delta)
+		pass
+		# TODO: It doesn't work as expected, need some fixes
+		# velocity = apply_knockback(delta)
 	elif is_attacking:
 		attack_cooldown_on = true
 		attack_cooldown_timer.start()
